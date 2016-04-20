@@ -55,7 +55,6 @@ var api = {
 
   // Add user friends  to Friends table DONE
   addFriend(userId, friendId, reqId, cb) {
-    console.log('addfriendargs: ', arguments);
     // Adding friend to my userdata Friends table
     var myFriends = new Firebase(`https://project-ruby.firebaseio.com/UserData/${userId}/Friends`);
     myFriends.push(friendId);
@@ -68,9 +67,7 @@ var api = {
   },
 
   removeFriendReq(userId, reqId, cb) {
-    console.log('reqId: ', reqId);
     var ref = new Firebase(`https://project-ruby.firebaseio.com/UserData/${userId}/FriendReqs`);
-    console.log('userId: ', userId);
     ref.child(reqId).remove((error) => {
       if (error) {
         console.log(error);
@@ -106,7 +103,7 @@ var api = {
         // Create an async function since we need to wait for the promises to return data
         async function getGroupInfo (callback){
           var result = [];
-          for (k in groups) {
+          for (var k in groups) {
             // Await waits for the promise chain to complete, then continues
             await callback(groups[k]).then((res) => {
               res.groupName = groups[k];
@@ -130,7 +127,7 @@ var api = {
         // Create an async function since we need to wait for the promises to return data
         async function getFriendData (callback){
           var result = [];
-          for (k in friends) {
+          for (var k in friends) {
             // Await waits for the promise chain to complete, then continues
             await callback(friends[k]).then((res) => {
               res.uid = friends[k];
@@ -150,15 +147,15 @@ var api = {
     return fetch(friendReqs)
     .then((res) => res.json())
     .then((friendReqs) => {
-      console.log('in api: ',friendReqs);
         // Create an async function since we need to wait for the promises to return data
         async function getFriendData (callback){
           var result = [];
-          for (k in friendReqs) {
+          for (var k in friendReqs) {
             // Await waits for the promise chain to complete, then continues
             await callback(friendReqs[k]).then((res) => {
               res.reqId = k;
-              res.uid = friendReqs[k];
+              var uid = friendReqs[k];
+              res.uid = uid;
               result.push(res);
             });
           }
@@ -177,7 +174,7 @@ var api = {
     .then((users) => {
       async function searchFriendData(callback) {
         var results = [];
-        for (k in users) {
+        for (var k in users) {
           if (users[k].email) {
             if (users[k].email.toLowerCase().includes(emailInput.toLowerCase())) {
               console.log('find user by email', users[k])
@@ -202,7 +199,7 @@ var api = {
     .then(res => res.json())
     .then((groups) => {
       var results = [];
-      for (k in groups) {
+      for (var k in groups) {
         if (k.toLowerCase().includes(nameInput.toLowerCase())) {
           groups[k].groupName = k
           results.push(groups[k]);

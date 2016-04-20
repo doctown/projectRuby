@@ -34,7 +34,6 @@ class FriendsAdd extends Component{
     var friendId = this.state.newFriend[0].uid;
     var that = this;
 
-    // api.addFriend(userId, friendId);
     api.sendFriendRequest(userId, friendId);
 
     that.setState({
@@ -42,7 +41,6 @@ class FriendsAdd extends Component{
       foundFriend: false
     });
 
-    that.props.handleFriendsRender(that.state.newFriend[0]);
 
     setTimeout(function() {
       that.setState({ updateAlert: '' });

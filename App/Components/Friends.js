@@ -29,15 +29,6 @@ class Friends extends Component{
     };
   }
 
-  handleFriendsRender(newFriend) {
-    var friendData = this.state.friendData;
-    friendData.push(newFriend.info);
-
-    this.setState({
-      friendData: friendData
-    });
-  }
-
   handleFriendReqsRender(newFriend) {
     var friendData = this.state.friendData;
     friendData.push(newFriend.info);
@@ -69,7 +60,6 @@ class Friends extends Component{
 
     api.getUserFriendReqs(that.props.userInfo.uid)
     .then(function(res) {
-      console.log('response: ', res);
       that.setState({
         friendReqData: res,
         isLoading: false
@@ -136,7 +126,7 @@ class Friends extends Component{
     that.props.navigator.push({
       title: 'Add Friends',
       component: FriendsAdd,
-      passProps: {userInfo: that.props.userInfo, allFriends: that.state.friendData, handleFriendsRender: that.handleFriendsRender.bind(that)}
+      passProps: {userInfo: that.props.userInfo, allFriends: that.state.friendData}
     });
   }
 
@@ -156,7 +146,6 @@ class Friends extends Component{
       if (friends.length > 0) {
         var friendsView = friends.map((item, index) => {
           return (
-
             <View key={index}>
             <TouchableHighlight
             style={styles.rowContainer}
@@ -172,7 +161,7 @@ class Friends extends Component{
             <Separator />
             </View>
             )
-        })
+        });
       } else {
         var friendsView = (
           <View>
@@ -181,11 +170,10 @@ class Friends extends Component{
           )
       };
 
-      console.log('number of friend reqs:', friendReqs.length);
       if (friendReqs.length > 0) {
+        var friendReqsHeader = (<Text style={styles.header}>Friend Requests</Text>);
         var friendsReqsView = friendReqs.map((item, index) => {
           return (
-
             <View key={index}>
             <TouchableHighlight
             style={styles.rowContainer}
@@ -200,8 +188,8 @@ class Friends extends Component{
             </TouchableHighlight>
             <Separator />
             </View>
-            )
-        })
+            );
+        });
       }
 
       return (
@@ -215,7 +203,7 @@ class Friends extends Component{
         >
         <Text style={styles.header}>Friends</Text>
         {friendsView}
-        <Text style={styles.header}>Friend Requests</Text>
+        {friendReqsHeader}
         {friendsReqsView}
         </ScrollView>
         </View>
