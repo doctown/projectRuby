@@ -67714,7 +67714,7 @@ isLoading:true});
 
 
 var that=this;
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 ref.authWithPassword({
 email:that.state.email,
 password:that.state.password},
@@ -68171,7 +68171,7 @@ var api={
 
 setUserData:function(myData,name,phone){
 var userId=myData.uid;
-var userData=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId);
+var userData=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId);
 
 userData.child('email').set(myData.password.email);
 userData.child('profileImageURL').set(myData.password.profileImageURL);
@@ -68181,14 +68181,14 @@ userData.child('phone').set(phone);},
 
 setUserLocation:function(myData,location){
 var userId=myData.uid;
-var userData=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId);
+var userData=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId);
 
 userData.child('location').set(location);},
 
 
 updateUserData:function(myData,item,value){
 var userId=myData.uid;
-var userData=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId);
+var userData=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId);
 
 if(item&&value){
 userData.child(item).set(value);}},
@@ -68198,50 +68198,50 @@ userData.child(item).set(value);}},
 
 addGroup:function(groupName,groupDescription,userId){
 
-var newGroup=new Firebase('https://project-sapphire.firebaseio.com/Groups/'+groupName);
+var newGroup=new Firebase('https://project-ruby.firebaseio.com/Groups/'+groupName);
 
 newGroup.child('description').set(groupDescription);
 newGroup.child('members').push(userId);
 
-var myGroups=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId+'/Groups');
+var myGroups=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId+'/Groups');
 myGroups.push(groupName);},
 
 
 
 joinGroup:function(groupName,userId){
 
-var groupToJoin=new Firebase('https://project-sapphire.firebaseio.com/Groups/'+groupName+'/members');
+var groupToJoin=new Firebase('https://project-ruby.firebaseio.com/Groups/'+groupName+'/members');
 groupToJoin.push(userId);
 
-var myGroups=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId+'/Groups');
+var myGroups=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId+'/Groups');
 myGroups.push(groupName);},
 
 
 
 addFriend:function(userId,friendId){
 
-var myFriends=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+userId+'/Friends');
+var myFriends=new Firebase('https://project-ruby.firebaseio.com/UserData/'+userId+'/Friends');
 myFriends.push(friendId);
 
 
-var theirFriends=new Firebase('https://project-sapphire.firebaseio.com/UserData/'+friendId+'/Friends');
+var theirFriends=new Firebase('https://project-ruby.firebaseio.com/UserData/'+friendId+'/Friends');
 theirFriends.push(userId);},
 
 
 
 getUserData:function(userId){
-var userData='https://project-sapphire.firebaseio.com/UserData/'+userId+'.json';
+var userData='https://project-ruby.firebaseio.com/UserData/'+userId+'.json';
 return fetch(userData).then(function(res){return res.json();});},
 
 
 getGroupData:function(groupName){
-var groupData='https://project-sapphire.firebaseio.com/Groups/'+groupName+'.json';
+var groupData='https://project-ruby.firebaseio.com/Groups/'+groupName+'.json';
 return fetch(groupData).then(function(res){return res.json();});},
 
 
 
 getUserGroups:function(userId){var _this=this;
-var groups='https://project-sapphire.firebaseio.com/UserData/'+userId+'/Groups.json';
+var groups='https://project-ruby.firebaseio.com/UserData/'+userId+'/Groups.json';
 return fetch(groups).
 then(function(res){return res.json();}).
 then(function(groups){
@@ -68265,7 +68265,7 @@ return getGroupInfo(_this.getGroupData);});},
 
 
 getUserFriends:function(userId){var _this2=this;
-var friends='https://project-sapphire.firebaseio.com/UserData/'+userId+'/Friends.json';
+var friends='https://project-ruby.firebaseio.com/UserData/'+userId+'/Friends.json';
 return fetch(friends).
 then(function(res){return res.json();}).
 then(function(friends){
@@ -68288,7 +68288,7 @@ return getFriendData(_this2.getUserData);});},
 
 
 findUserByEmail:function(emailInput){var _this3=this;
-var users='https://project-sapphire.firebaseio.com/UserData.json';
+var users='https://project-ruby.firebaseio.com/UserData.json';
 return fetch(users).
 then(function(res){return res.json();}).
 then(function(users){
@@ -68314,7 +68314,7 @@ return searchFriendData(_this3.getUserData);});},
 
 
 findGroupByName:function(nameInput){
-var groups='https://project-sapphire.firebaseio.com/Groups.json';
+var groups='https://project-ruby.firebaseio.com/Groups.json';
 return fetch(groups).
 then(function(res){return res.json();}).
 then(function(groups){
@@ -68370,7 +68370,7 @@ isLoading:true});
 
 var that=this;
 
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 ref.createUser({
 email:that.state.email,
 password:that.state.password},
@@ -68554,7 +68554,7 @@ return obj;}},{key:'goToProfile',value:function goToProfile()
 
 
 {
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 var myData=ref.getAuth();
 
 
@@ -68584,7 +68584,7 @@ component:Map});}},{key:'render',value:function render()
 
 {
 
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 ref.child('Friends').on('value',function(item){
 item.val();});
 
@@ -70003,7 +70003,7 @@ this.supplementInfo();}}}},{key:'delayInfo',value:function delayInfo()
 {
 
 var that=this;
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 ref.authWithPassword({
 email:that.props.email,
 password:that.props.password},
@@ -70032,7 +70032,7 @@ passProps:{userInfo:authData}});}});}},{key:'supplementInfo',value:function supp
 {
 
 var that=this;
-var ref=new Firebase("https://project-sapphire.firebaseio.com");
+var ref=new Firebase("https://project-ruby.firebaseio.com");
 ref.authWithPassword({
 email:that.props.email,
 password:that.props.password},

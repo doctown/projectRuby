@@ -87,7 +87,7 @@ class SignupAddInfo extends React.Component{
   delayInfo() {
 
     var that = this;
-    var ref = new Firebase("https://project-sapphire.firebaseio.com");
+    var ref = new Firebase("https://project-ruby.firebaseio.com");
     ref.authWithPassword({
       email: that.props.email,
       password: that.props.password
@@ -116,7 +116,7 @@ class SignupAddInfo extends React.Component{
   supplementInfo() {
 
     var that = this;
-    var ref = new Firebase("https://project-sapphire.firebaseio.com");
+    var ref = new Firebase("https://project-ruby.firebaseio.com");
     ref.authWithPassword({
       email: that.props.email,
       password: that.props.password
