@@ -35,7 +35,7 @@ class Signup extends React.Component{
     // Using Firebase to create new user
     var that = this;
 
-    var ref = new Firebase("https://project-sapphire.firebaseio.com");
+    var ref = new Firebase("https://project-ruby.firebaseio.com");
     ref.createUser({
       email    : that.state.email,
       password : that.state.password

@@ -40,7 +40,7 @@ class Main extends React.Component{
   loggingIn() {
     // Using Firebase to authenticate
     var that = this;
-    var ref = new Firebase("https://project-sapphire.firebaseio.com");
+    var ref = new Firebase("https://project-ruby.firebaseio.com");
     ref.authWithPassword({
       email: that.state.email,
       password: that.state.password
