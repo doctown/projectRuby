@@ -15,7 +15,7 @@ import React, {
 class FriendsAdd extends Component{
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       updateAlert: '',
       isLoading: false,
@@ -34,17 +34,16 @@ class FriendsAdd extends Component{
     var friendId = this.state.newFriend[0].uid;
     var that = this;
 
-    api.addFriend(userId, friendId)
+    api.sendFriendRequest(userId, friendId);
 
     that.setState({
-      updateAlert: 'You have added a new friend!',
+      updateAlert: 'Friend Request Sent!',
       foundFriend: false
-    })
+    });
 
-    that.props.handleFriendsRender(that.state.newFriend[0]);
 
     setTimeout(function() {
-      that.setState({ updateAlert: '' })
+      that.setState({ updateAlert: '' });
     }, 3000);
   }
 
@@ -56,7 +55,7 @@ class FriendsAdd extends Component{
 
     that.setState({
       isLoading: true
-    })
+    });
 
     if (allFriends.length > 0) {
       for (var i = 0; i < allFriends.length; i++) {
@@ -64,33 +63,33 @@ class FriendsAdd extends Component{
           that.setState({
             updateAlert: 'You are already friends with that person!',
             isLoading: false
-          })
+          });
           foundFriend = true;
         }
       }
     }
 
     if (foundFriend === false) {
-      console.log('friend email is ', that.state.friendEmail)
+      console.log('friend email is ', that.state.friendEmail);
       api.findUserByEmail(friendEmail)
         .then(function(res) {
           that.setState({
-            newFriend: res, 
+            newFriend: res,
             isLoading: false,
             foundFriend: true
-          })
+          });
         })
         .catch(function(err) {
           that.setState({
             updateAlert: 'That user was not found.',
             isLoading: false,
             foundFriend: false
-          })
-        })
+          });
+        });
     }
 
     setTimeout(function() {
-      that.setState({ updateAlert: ''})
+      that.setState({ updateAlert: ''});
     }, 3000);
   }
 
@@ -112,12 +111,12 @@ class FriendsAdd extends Component{
         }
 
         if (currentFriend === false) {
-          friendList.push(friends[i])
+          friendList.push(friends[i]);
         }
       }
 
       var friendDisplay = friendList.map((item, index) => {
-        
+
         return (
 
           <View key={index}>
@@ -148,7 +147,7 @@ class FriendsAdd extends Component{
     }
 
     var userData = this.props.userData;
-    
+
     return (
       <View style={styles.container}>
         <Text style={styles.alertText}>{this.state.updateAlert}</Text>
@@ -158,7 +157,7 @@ class FriendsAdd extends Component{
               autoCapitalize='none'
               style={styles.searchInput}
               onChange={(event)=>this.captureItemChange(event)} />
-            <TouchableHighlight 
+            <TouchableHighlight
               style={styles.button}
               onPress={()=>this.searchForFriend()}
               underlayColor='white' >
@@ -232,7 +231,7 @@ var styles = {
     marginTop: 15,
     fontSize: 20,
     backgroundColor: 'rgba(0,0,0,0)'
-  },  
+  },
   searchInput: {
     height: 30,
     borderWidth: 1,
