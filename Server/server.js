@@ -11,7 +11,7 @@ var io = require('socket.io').listen(server);
 console.log('Sapphire is listening in on 4568');
 server.listen(4568);
 
-app.use(bodyParser());
+app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -47,21 +47,46 @@ app.post('/connect',
     res.status(200).send('I think it worked');
   });
 
+var sockets = {};
+
 io.on('connection', function(socket) {
+  socket.friends = [];
+
   socket.on('chat message', (msg) => {
     console.log('Something Happened!', msg);
+    socketArray.push(socket);
     io.emit('chat message', msg);
   });
-  socket.on('change location', (loc) => {
-    console.log('This is the location: ', loc);
-    io.emit('change location', loc);
+
+  socket.on('registerID', (id) => {
+    sockets[id] = socket;
   });
+
+  socket.on('registerFriends', (friends) => {
+    socket.friends = friends;
+  });
+
+  socket.on('change location', (loc) => {
+    // console.log('This is the location: ', loc);
+    io.emit('change location', loc);
+    for (var i = 0; i < socket.friends.length; i++) {
+      var friendSocket = sockets[socket.friends[i]];
+      if (friendSocket) {
+        friendSocket.emit('change location', loc);
+      } else {
+        console.log('Friend not logged in: ', socket.friends[i]);
+      }
+    }
+  });
+
   socket.on('found location', (loc) => {
     console.log('This is another location: ', loc);
     io.emit('found location', loc);
   });
+
   socket.on('disconnect', () => {
     console.log('A user has disconnected');
   });
+
   console.log('a user has connected');
 });

@@ -1,4 +1,4 @@
-var socket = io.connect('http://107.170.3.84:4568');
+var socket = io.connect('http://http://107.170.3.84:4568');
 window.sapphireMap = {
   accessToken: 'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg',
   mapAccess: L.mapbox.accessToken = 'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg',
