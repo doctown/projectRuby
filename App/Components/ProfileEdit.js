@@ -39,7 +39,7 @@ class ProfileEdit extends Component{
     var that = this;
 
     api.updateUserData(myData, item, value);
-    
+
     that.setState({
       updateAlert: 'You have updated your info!'
     })
@@ -54,8 +54,8 @@ class ProfileEdit extends Component{
 
   render(){
     var userData = this.props.userData;
-    var topicArr = ['name', 'phone'];
-    
+    var topicArr = ['status','name', 'phone'];
+
     var list = topicArr.map((item, index) => {
         return (
           <View key={index}>
@@ -66,7 +66,7 @@ class ProfileEdit extends Component{
               style={styles.searchInput}
               defaultValue={userData[item]}
               onChange={(event)=>this.captureItemChange(event, item)} />
-            <TouchableHighlight 
+            <TouchableHighlight
               style={styles.button}
               onPress={()=>this.editItem(item)}
               underlayColor='white' >

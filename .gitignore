@@ -16,3 +16,4 @@ profile
 *.xcuserdatad
 
 .DS_Store
+.eslintrc
