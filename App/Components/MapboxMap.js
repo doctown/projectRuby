@@ -79,10 +79,11 @@ var MapboxMap = React.createClass({
     this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
 
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
-      var friends = friendData.map((friend) => {
+      this.friends = friendData;
+      var friendIDs = friendData.map((friend) => {
         return friend.uid;
       });
-      this.socket.emit('registerFriends', friends);
+      this.socket.emit('registerFriends', friendIDs);
     });
     this.socket.on('chat message', (msg) => {
       console.log('Woohoo it worked! ', msg);
@@ -93,6 +94,15 @@ var MapboxMap = React.createClass({
     this.socket.on('change location', (changeInfo) => {
       var id = changeInfo.id;
       var loc = changeInfo.loc;
+
+      /* Find appropriate friend to update map info */
+      var friends = this.friends;
+      var friend;
+      for (var i = 0; i < friends.length; i++) {
+        if (friends[i].uid === id) {
+          friend = friends[i];
+        }
+      }
 
       if (connectedIDs.indexOf(id) < 0) {
         connectedIDs.push(id);
@@ -107,8 +117,8 @@ var MapboxMap = React.createClass({
         this.updateAnnotation(mapRef, {
           coordinates: [lat, long],
           'type': 'point',
-          title: id,
-          subtitle: 'New Subtitle',
+          title: friend.name,
+          subtitle: friend.status,
           annotationImage: {
             url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
             height: 25,
