@@ -50,6 +50,11 @@ var MapboxMap = React.createClass({
   onRegionWillChange(location) {
     console.log(location);
   },
+  emitLocation(location) {
+    this.socket.emit('change location', location);
+    console.log('updating location');
+  },
+
   onUpdateUserLocation(location) {
     this.emitLocationThrottled(location);
     this.setState({currentLoc: location});
@@ -71,10 +76,7 @@ var MapboxMap = React.createClass({
     this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false});
     this.socket.emit('registerID', this.props.userInfo.uid);
 
-    this.emitLocationThrottled = _.throttle((location) => {
-      this.socket.emit('change location', location);
-      console.log('updating location');
-    }, 15000);
+    this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
 
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
       var friends = friendData.map((friend) => {
@@ -86,9 +88,16 @@ var MapboxMap = React.createClass({
       console.log('Woohoo it worked! ', msg);
     });
 
+    var connectedIDs = [];
+
     this.socket.on('change location', (changeInfo) => {
       var id = changeInfo.id;
       var loc = changeInfo.loc;
+
+      if (connectedIDs.indexOf(id) < 0) {
+        connectedIDs.push(id);
+        this.emitLocation(this.state.currentLoc);
+      }
 
       var myLat = this.state.currentLoc.latitude;
       var myLong = this.state.currentLoc.longitude;
@@ -117,6 +126,7 @@ var MapboxMap = React.createClass({
 
     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
+      connectedIDs.splice(connectedIDs.indexOf(id), 1);
     })
 
     this.socket.on('found location', (loc) => {

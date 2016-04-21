@@ -21,7 +21,7 @@ class TabBar extends React.Component {
     }
   }
   setTab(tabId){
-    this.setState({selectedTab: tabId})
+    this.setState({selectedTab: tabId});
   }
   render(){
     return (
