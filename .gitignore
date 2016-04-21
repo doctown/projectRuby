@@ -14,3 +14,6 @@ ios/build
 ios/.DS_Store
 profile
 *.xcuserdatad
+
+.DS_Store
+.eslintrc

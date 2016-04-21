@@ -49,7 +49,7 @@ class Profile extends Component{
   getAsyncData() {
     var that = this;
     api.getUserData(that.props.userInfo.uid)
-      .then(function(res) { 
+      .then(function(res) {
         that.setState({
           userData: res,
           isLoading: false
@@ -68,22 +68,17 @@ class Profile extends Component{
       )
     } else {
       var userData = this.state.userData;
-      var topicArr = ['email', 'phone'];
-      
+      var topicArr = ['status', 'email', 'phone'];
+
       var list = topicArr.map((item, index) => {
-        if(!userData[item]) {
-          return
-            <View key={index} />
-        } else {
           return (
-            <View key={index}>
-              <View style={styles.rowContainer}>
-                <Text style={styles.rowTitle}> {this.getRowTitle(userData, item)} </Text>
-                <Text style={styles.rowContent}> {userData[item]} </Text>
-              </View>
+          <View key={index}>
+            <View style={styles.rowContainer}>
+              <Text style={styles.rowTitle}> {this.getRowTitle(userData, item)} </Text>
+              <Text style={styles.rowContent}> {userData[item]} </Text>
             </View>
-          )
-        }
+          </View>
+        )
       })
       return (
         <View>
