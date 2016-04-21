@@ -147,6 +147,10 @@ var MapboxMap = React.createClass({
       }
     });
 
+    this.socket.on('logoff', (id) => {
+      this.removeAnnotation(mapRef, id);
+    })
+
     // this.socket.on('change location', (loc) => {
     //   // console.log('This is the loc: ', loc);
     //   var myLat = this.state.currentLoc.latitude;

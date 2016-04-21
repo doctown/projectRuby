@@ -63,7 +63,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('registerFriends', (friends) => {
-    socket.friends = friends;
+    socket.friends = friends || [];
   });
 
   socket.on('change location', (loc) => {
@@ -82,6 +82,13 @@ io.on('connection', function(socket) {
   });
 
   socket.on('disconnect', () => {
+    for (var i = 0; i < socket.friends.length; i++) {
+      var friendSocket = sockets[socket.friends[i]];
+      if (friendSocket) {
+        friendSocket.emit('logoff', socket.id);
+      }
+    }
+
     sockets[socket.id] = undefined;
     console.log('A user has disconnected');
   });
