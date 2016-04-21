@@ -11,6 +11,8 @@ import Mapbox from 'react-native-mapbox-gl';
 import io from 'socket.io-client/socket.io';
 window.navigator.userAgent = "react-native";
 
+var api = require('../Utils/api');
+
 var mapRef = 'mapRef';
 
 var MapboxMap = React.createClass({
@@ -62,7 +64,7 @@ var MapboxMap = React.createClass({
         'fillColor': 'blue',
         'id': 'zap'
       }],
-      socket: io('http://107.170.3.84:4568', {jsonp: false})
+      socket: io('http://http://107.170.3.84:4568', {jsonp: false})
      };
   },
   onRegionChange(location) {
@@ -89,12 +91,19 @@ var MapboxMap = React.createClass({
   },
   componentDidMount(){
     this.setUserTrackingMode(mapRef, this.userTrackingMode.follow);
-    this.socket = io.connect('http://107.170.3.84:4568', {jsonp: false});
+    this.socket = io.connect('http://http://107.170.3.84:4568', {jsonp: false});
+    this.socket.emit('registerID', this.props.userInfo.uid);
+    api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
+      var friends = friendData.map((friend) => {
+        return friend.uid;
+      });
+      this.socket.emit('registerFriends', friends);
+    });
     this.socket.on('chat message', (msg) => {
       console.log('Woohoo it worked! ', msg);
     });
     this.socket.on('change location', (loc) => {
-      console.log('This is the loc: ', loc);
+      // console.log('This is the loc: ', loc);
       var myLat = this.state.currentLoc.latitude;
       var myLong = this.state.currentLoc.longitude;
       var lat = loc.latitude;
