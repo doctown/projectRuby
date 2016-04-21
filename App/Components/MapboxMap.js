@@ -65,7 +65,7 @@ var MapboxMap = React.createClass({
         'id': 'zap'
       }],
       socket: io('http://159.203.222.32:4568', {jsonp: false})
-     };
+    };
   },
   onRegionChange(location) {
     this.setState({ currentZoom: location.zoom });
@@ -93,6 +93,7 @@ var MapboxMap = React.createClass({
     this.setUserTrackingMode(mapRef, this.userTrackingMode.follow);
     this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false});
     this.socket.emit('registerID', this.props.userInfo.uid);
+
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
       var friends = friendData.map((friend) => {
         return friend.uid;
@@ -102,31 +103,76 @@ var MapboxMap = React.createClass({
     this.socket.on('chat message', (msg) => {
       console.log('Woohoo it worked! ', msg);
     });
-    this.socket.on('change location', (loc) => {
-      // console.log('This is the loc: ', loc);
+
+    // this.socket.on('friend connected', id) {
+    //   this.updateAnnotation(mapRef, {
+    //     'type': 'point',
+    //     title: id,
+    //     subtitle: 'New Subtitle',
+    //     annotationImage: {
+    //       url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
+    //       height: 25,
+    //       width: 25
+    //     },
+    //     id: id
+    //   });
+    // }
+
+    this.socket.on('change location', (changeInfo) => {
+      var id = changeInfo.id;
+      var loc = changeInfo.loc;
+
       var myLat = this.state.currentLoc.latitude;
       var myLong = this.state.currentLoc.longitude;
       var lat = loc.latitude;
       var long = loc.longitude;
       if (loc.latitude !== this.state.currentLoc.latitude) {
-      this.updateAnnotation(mapRef, {
+        this.updateAnnotation(mapRef, {
           coordinates: [lat, long],
           'type': 'point',
-          title: 'New Title!',
+          title: id,
           subtitle: 'New Subtitle',
           annotationImage: {
             url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
             height: 25,
             width: 25
           },
-          id: 'marker2'
-        })
+          id: id
+        });
+
         if (!this.state.boundSet) {
           this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
           this.state.boundSet = true;
         }
       }
     });
+
+    // this.socket.on('change location', (loc) => {
+    //   // console.log('This is the loc: ', loc);
+    //   var myLat = this.state.currentLoc.latitude;
+    //   var myLong = this.state.currentLoc.longitude;
+    //   var lat = loc.latitude;
+    //   var long = loc.longitude;
+    //   if (loc.latitude !== this.state.currentLoc.latitude) {
+    //     this.updateAnnotation(mapRef, {
+    //       coordinates: [lat, long],
+    //       'type': 'point',
+    //       title: 'New Title!',
+    //       subtitle: 'New Subtitle',
+    //       annotationImage: {
+    //         url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
+    //         height: 25,
+    //         width: 25
+    //       },
+    //       id: 'marker2'
+    //     })
+    //     if (!this.state.boundSet) {
+    //       this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
+    //       this.state.boundSet = true;
+    //     }
+    //   }
+    // });
+
     this.socket.on('found location', (loc) => {
       console.log('This is the loc from website: ', loc);
       // loc comes in as [longitude, latitude] which is what the webapp version wants,
@@ -142,29 +188,29 @@ var MapboxMap = React.createClass({
     StatusBar.setHidden(true);
     return (
       <View style={styles.main}>
-        <Mapbox
-          style={styles.container}
-          direction={0}
-          rotateEnabled={true}
-          scrollEnabled={true}
-          zoomEnabled={true}
-          showsUserLocation={true}
-          ref={mapRef}
-          accessToken={'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg'}
-          styleURL={this.mapStyles.emerald}
-          userTrackingMode={this.userTrackingMode.none}
-          centerCoordinate={this.state.center}
-          zoomLevel={this.state.zoom}
-          onRegionChange={this.onRegionChange}
-          onRegionWillChange={this.onRegionWillChange}
-          annotations={this.state.annotations}
-          onOpenAnnotation={this.onOpenAnnotation}
-          onRightAnnotationTapped={this.onRightAnnotationTapped}
-          onUpdateUserLocation={this.onUpdateUserLocation}
-          onLongPress={this.onLongPress}
-          onTap={this.onTap} />
+      <Mapbox
+      style={styles.container}
+      direction={0}
+      rotateEnabled={true}
+      scrollEnabled={true}
+      zoomEnabled={true}
+      showsUserLocation={true}
+      ref={mapRef}
+      accessToken={'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg'}
+      styleURL={this.mapStyles.emerald}
+      userTrackingMode={this.userTrackingMode.none}
+      centerCoordinate={this.state.center}
+      zoomLevel={this.state.zoom}
+      onRegionChange={this.onRegionChange}
+      onRegionWillChange={this.onRegionWillChange}
+      annotations={this.state.annotations}
+      onOpenAnnotation={this.onOpenAnnotation}
+      onRightAnnotationTapped={this.onRightAnnotationTapped}
+      onUpdateUserLocation={this.onUpdateUserLocation}
+      onLongPress={this.onLongPress}
+      onTap={this.onTap} />
       </View>
-    );
+      );
   }
 });
 var width = Dimensions.get('window').width;
