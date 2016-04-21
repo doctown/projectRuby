@@ -15,6 +15,8 @@ var api = require('../Utils/api');
 
 var mapRef = 'mapRef';
 
+var _ = require('lodash');
+
 var MapboxMap = React.createClass({
   mixins: [Mapbox.Mixin],
   getInitialState() {
@@ -38,31 +40,6 @@ var MapboxMap = React.createClass({
           width: 25
         },
         id: 'marker1'
-      }, {
-        coordinates: [40.714541341726175,-74.00579452514648],
-        'type': 'point',
-        title: 'Important!',
-        subtitle: 'Neat, this is a custom annotation image',
-        annotationImage: {
-          url: 'https://cldup.com/7NLZklp8zS.png',
-          height: 25,
-          width: 25
-        },
-        id: 'marker2'
-      }, {
-        'coordinates': [[40.76572150042782,-73.99429321289062],[40.743485405490695, -74.00218963623047],[40.728266950429735,-74.00218963623047],[40.728266950429735,-73.99154663085938],[40.73633186448861,-73.98983001708984],[40.74465591168391,-73.98914337158203],[40.749337730454826,-73.9870834350586]],
-        'type': 'polyline',
-        'strokeColor': '#00FB00',
-        'strokeWidth': 4,
-        'strokeAlpha': .5,
-        'id': 'foobar'
-      }, {
-        'coordinates': [[40.749857912194386, -73.96820068359375], [40.741924698522055,-73.9735221862793], [40.735681504432264,-73.97523880004883], [40.7315190495212,-73.97438049316406], [40.729177554196376,-73.97180557250975], [40.72345355209305,-73.97438049316406], [40.719290332250544,-73.97455215454102], [40.71369559554873,-73.97729873657227], [40.71200407096382,-73.97850036621094], [40.71031250340588,-73.98691177368163], [40.71031250340588,-73.99154663085938]],
-        'type': 'polygon',
-        'fillAlpha':1,
-        'strokeColor': '#fffff',
-        'fillColor': 'blue',
-        'id': 'zap'
       }],
       socket: io('http://159.203.222.32:4568', {jsonp: false})
     };
@@ -74,7 +51,7 @@ var MapboxMap = React.createClass({
     console.log(location);
   },
   onUpdateUserLocation(location) {
-    this.socket.emit('change location', location);
+    this.emitLocationThrottled(location);
     this.setState({currentLoc: location});
   },
   onOpenAnnotation(annotation) {
@@ -94,6 +71,11 @@ var MapboxMap = React.createClass({
     this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false});
     this.socket.emit('registerID', this.props.userInfo.uid);
 
+    this.emitLocationThrottled = _.throttle((location) => {
+      this.socket.emit('change location', location);
+      console.log('updating location');
+    }, 15000);
+
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
       var friends = friendData.map((friend) => {
         return friend.uid;
@@ -103,20 +85,6 @@ var MapboxMap = React.createClass({
     this.socket.on('chat message', (msg) => {
       console.log('Woohoo it worked! ', msg);
     });
-
-    // this.socket.on('friend connected', id) {
-    //   this.updateAnnotation(mapRef, {
-    //     'type': 'point',
-    //     title: id,
-    //     subtitle: 'New Subtitle',
-    //     annotationImage: {
-    //       url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
-    //       height: 25,
-    //       width: 25
-    //     },
-    //     id: id
-    //   });
-    // }
 
     this.socket.on('change location', (changeInfo) => {
       var id = changeInfo.id;
@@ -150,32 +118,6 @@ var MapboxMap = React.createClass({
     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
     })
-
-    // this.socket.on('change location', (loc) => {
-    //   // console.log('This is the loc: ', loc);
-    //   var myLat = this.state.currentLoc.latitude;
-    //   var myLong = this.state.currentLoc.longitude;
-    //   var lat = loc.latitude;
-    //   var long = loc.longitude;
-    //   if (loc.latitude !== this.state.currentLoc.latitude) {
-    //     this.updateAnnotation(mapRef, {
-    //       coordinates: [lat, long],
-    //       'type': 'point',
-    //       title: 'New Title!',
-    //       subtitle: 'New Subtitle',
-    //       annotationImage: {
-    //         url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
-    //         height: 25,
-    //         width: 25
-    //       },
-    //       id: 'marker2'
-    //     })
-    //     if (!this.state.boundSet) {
-    //       this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
-    //       this.state.boundSet = true;
-    //     }
-    //   }
-    // });
 
     this.socket.on('found location', (loc) => {
       console.log('This is the loc from website: ', loc);
@@ -217,6 +159,7 @@ var MapboxMap = React.createClass({
       );
   }
 });
+
 var width = Dimensions.get('window').width;
 var styles = StyleSheet.create({
   button: {
