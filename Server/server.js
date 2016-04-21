@@ -54,7 +54,6 @@ io.on('connection', function(socket) {
 
   socket.on('chat message', (msg) => {
     console.log('Something Happened!', msg);
-    socketArray.push(socket);
     io.emit('chat message', msg);
   });
 
@@ -69,7 +68,6 @@ io.on('connection', function(socket) {
 
   socket.on('change location', (loc) => {
     // console.log('This is the location: ', loc);
-    io.emit('change location', loc);
     for (var i = 0; i < socket.friends.length; i++) {
       var friendSocket = sockets[socket.friends[i]];
       if (friendSocket) {
