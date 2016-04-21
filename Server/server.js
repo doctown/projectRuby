@@ -59,6 +59,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('registerID', (id) => {
+    socket.id = id;
     sockets[id] = socket;
   });
 
@@ -73,8 +74,6 @@ io.on('connection', function(socket) {
       var friendSocket = sockets[socket.friends[i]];
       if (friendSocket) {
         friendSocket.emit('change location', loc);
-      } else {
-        console.log('Friend not logged in: ', socket.friends[i]);
       }
     }
   });
