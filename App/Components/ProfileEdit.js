@@ -40,6 +40,10 @@ class ProfileEdit extends Component{
     var myData = this.props.authInfo;
     var that = this;
 
+    console.log('item:', item);
+    console.log('value:', value);
+    console.log('myData:', myData);
+
     api.updateUserData(myData, item, value);
 
     that.setState({

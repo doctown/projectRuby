@@ -8,7 +8,8 @@ import React, {
   StyleSheet,
   Component,
   ScrollView,
-  TouchableHighlight
+  TouchableHighlight,
+  TextInput
 } from 'react-native';
 
 class Profile extends Component{
@@ -16,7 +17,8 @@ class Profile extends Component{
   constructor(props) {
     super(props)
     this.state = {
-      isLoading: true
+      isLoading: true,
+      status: ''
     };
   }
 
@@ -59,6 +61,57 @@ class Profile extends Component{
       .catch((err) => console.log(err))
   }
 
+  handleSubmit() {
+    var statusUpdate = this.state.status;
+    console.log('status update: ', statusUpdate);
+    this.setState({
+      status: ''
+    });
+    // TODO: Refactor below
+    // var item = item;
+    var myData = this.props.userInfo;
+    var that = this;
+    console.log(myData);
+
+    api.updateUserData(myData, 'status', statusUpdate);
+
+    // that.setState({
+    //   updateAlert: 'You have updated your info!'
+    // })
+
+    this.handleProfileRender('status', statusUpdate);
+
+    // setTimeout(function() {
+    //   that.setState({ updateAlert: '' })
+    // }, 1000);
+    // send status updat to firbase with api
+  }
+
+  handleChange(e) {
+    this.setState({
+      status: e.nativeEvent.text
+    })
+  }
+
+  footer(){
+    return (
+      <View style={styles.footerContainer}>
+        <TextInput
+            style={styles.searchInput}
+            value={this.state.status}
+            onChange={this.handleChange.bind(this)} //TODO: implement handleChange
+            placeholder="Update your status..."
+            placeholderTextColor="#498183" />
+        <TouchableHighlight
+            style={styles.button}
+            onPress={this.handleSubmit.bind(this)}
+            underlayColor="#88D4F5">
+              <Text style={styles.buttonText}>Submit</Text>
+          </TouchableHighlight>
+      </View>
+    )
+  }
+
 
   render(){
     if (this.state.isLoading) {
@@ -70,6 +123,7 @@ class Profile extends Component{
     } else {
       var userData = this.state.userData;
       var topicArr = ['status', 'email', 'phone'];
+      var context = this;
 
       var list = topicArr.map((item, index) => {
           return (
@@ -93,6 +147,7 @@ class Profile extends Component{
           <View style={styles.container}>
             {list}
           </View>
+          {this.footer()}
         </View>
       )
     }
@@ -156,6 +211,36 @@ var styles = {
   rowContent: {
     color: '#022c3d',
     fontSize: 19
+  },
+  footerContainer: {
+    backgroundColor: '#E3E3E3',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 10
+    // flex: 1
+  },
+  searchInput: {
+    height: 60,
+    width: 300,
+    // flexDirection: 'row',
+    padding: 15,
+    paddingLeft: 25,
+    fontSize: 18,
+    color: '#498183',
+    backgroundColor: '#F0F4F5'
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white'
+  },
+  button: {
+    height: 60,
+    width: 100,
+    backgroundColor: '#498183',
+    flex: 3,
+    // flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 };
 
