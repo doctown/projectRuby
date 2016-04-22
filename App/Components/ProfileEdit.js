@@ -1,6 +1,8 @@
 var api = require('../Utils/api');
+var ImagePickerManager = require('NativeModules').ImagePickerManager;
 
 import React, {
+  CameraRoll,
   View,
   Text,
   Image,
@@ -54,8 +56,10 @@ class ProfileEdit extends Component{
 
   render(){
     var userData = this.props.userData;
-    var topicArr = ['status','name', 'phone'];
 
+    //add function here
+
+    var topicArr = ['status','name', 'phone'];
     var list = topicArr.map((item, index) => {
         return (
           <View key={index}>
