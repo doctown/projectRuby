@@ -150,10 +150,10 @@ class Friends extends Component{
         <ScrollView
         showsVerticalScrollIndicator={true}
         >
-        <Text style={styles.header}>Friends</Text>
-        {friendsView}
         {friendReqsHeader}
         {friendsReqsView}
+        <Text style={styles.header}>Friends</Text>
+        {friendsView}
         </ScrollView>
         </View>
         )
