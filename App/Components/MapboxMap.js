@@ -57,9 +57,13 @@ var MapboxMap = React.createClass({
   onUpdateUserLocation(location) {
     this.emitLocationThrottled(location);
     this.setState({currentLoc: location});
-    if (this.atSameLocation(location, this.destination)) {
-      this.removeAnnotation(mapRef, 'destination');
-      this.emit('remove destination');
+
+    if (this.destination) {
+      if (this.atSameLocation(location, this.destination, {distance: 1500, unit: 'meters'})) {
+        this.removeAnnotation(mapRef, 'destination');
+        delete this.destination;
+        this.socket.emit('remove destination');
+      }
     }
   },
   onOpenAnnotation(annotation) {
@@ -73,7 +77,7 @@ var MapboxMap = React.createClass({
    * @params: option.distance - distance between coordinates
    *          option.unit - unit of measurement for distance
    */
-  atSameLocation(location1, location2, option = {distance: 1, unit: 'miles'}) {
+   atSameLocation(location1, location2, option = {distance: 1, unit: 'miles'}) {
     // Create a polygon around location1 and location2 and see if they intercept
     var point1 = turf.point([location1['longitude'], location1['latitude']], {name: 'loc-1'});
     var point2 = turf.point([location2['longitude'], location2['latitude']], {name: 'loc-2'});
@@ -151,7 +155,7 @@ var MapboxMap = React.createClass({
      *          notification.senderID - id of the sender
      *          notification.recipientID - id of the person to be notified
      */
-    this.socket.on('notification', (notification) => {
+     this.socket.on('notification', (notification) => {
       // TODO: Add a notification event like a push notification.
       console.log('notification received');
     });
@@ -165,7 +169,7 @@ var MapboxMap = React.createClass({
      *          changeInfo.loc.latitude - latitude
      *          this.fiends.uid - user id of the friend
      */
-    this.socket.on('change location', (changeInfo) => {
+     this.socket.on('change location', (changeInfo) => {
       var id = changeInfo.id;
       var loc = changeInfo.loc;
 
@@ -212,7 +216,7 @@ var MapboxMap = React.createClass({
       }
     });
 
-    this.socket.on('set destination', (destinationInfo) => {
+     this.socket.on('set destination', (destinationInfo) => {
       var id = destinationInfo.id;
       var loc = destinationInfo.loc;
 
@@ -247,20 +251,20 @@ var MapboxMap = React.createClass({
       }
     });
 
-    this.socket.on('remove destination', (id) => {
+     this.socket.on('remove destination', (id) => {
       this.removeAnnotation(mapRef, id + 'dest');
     });
 
     /*
      * When a friend logs off, remove the friend from this user's list of connected users.
      */
-    this.socket.on('logoff', (id) => {
+     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
       this.removeAnnotation(mapRef, id + 'dest');
       connectedIDs.splice(connectedIDs.indexOf(id), 1);
     });
 
-    this.socket.on('found location', (loc) => {
+     this.socket.on('found location', (loc) => {
       console.log('This is the loc from website: ', loc);
       // loc comes in as [longitude, latitude] which is what the webapp version wants,
       // but the react native version wants the [latitude, longitude], so we flip them.
@@ -270,7 +274,7 @@ var MapboxMap = React.createClass({
       //   {method: 'get'})
       //   .then((res) => {console.log(res)});
     });
-  },
+   },
   /*
    * Determines if a user and a end-points' location intersect. If so,
    * notifies the end-point that the user is within the vicinity.
@@ -281,7 +285,7 @@ var MapboxMap = React.createClass({
    *          option.distance - distance between coordinates
    *          option.unit - unit of measurement for distance
    */
-  checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket, option) {
+   checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket, option) {
     if (this.atSameLocation(myCoordinates, endPointCoordinates, option)) {
       // push notification that my location is near my endpoint
       socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
