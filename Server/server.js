@@ -1,12 +1,7 @@
 var bodyParser = require('body-parser');
-// var http = require('http').createServer(app);
-// var io = require('socket.io').listen(http);
-
 var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-// var http = require('http');
-// var server = http.createServer(app);
 
 console.log('Sapphire is listening in on 4568');
 server.listen(4568);
@@ -57,6 +52,16 @@ io.on('connection', function(socket) {
     io.emit('chat message', msg);
   });
 
+  /*
+   * Receives a notification and sends it to the recipient.
+   * @params: notification.message - message to be communicated
+   *          notification.senderID - id of the sender
+   *          notification.recipientID - id of the person to be notified
+   */
+  socket.on('notification', (notification) => {
+    sockets[notification.recipientID].emit('notification', notification);
+  });
+
   socket.on('registerID', (id) => {
     socket.id = id;
     sockets[id] = socket;
@@ -66,8 +71,14 @@ io.on('connection', function(socket) {
     socket.friends = friends || [];
   });
 
+  /*
+   * On each change of location from the client, the server is notified. In response it
+   * sends an update of this user's location to all friends so they can change their location
+   * on their maps.
+   * @params: loc.latitude - new user latitude
+   *          loc.longitude - new user longitude
+   */
   socket.on('change location', (loc) => {
-    // console.log('This is the location: ', loc);
     for (var i = 0; i < socket.friends.length; i++) {
       var friendSocket = sockets[socket.friends[i]];
       if (friendSocket) {

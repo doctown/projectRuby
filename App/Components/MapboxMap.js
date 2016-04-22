@@ -13,9 +13,8 @@ import io from 'socket.io-client/socket.io';
 window.navigator.userAgent = "react-native";
 
 var api = require('../Utils/api');
-
+var turf = require('turf');
 var mapRef = 'mapRef';
-
 var _ = require('lodash');
 
 var MapboxMap = React.createClass({
@@ -65,9 +64,18 @@ var MapboxMap = React.createClass({
   onRightAnnotationTapped(e) {
     console.log(e);
   },
-  atSameLocation() {
-    const precisionRadius = 1000;
-    return false;
+  /*
+   * Determines if two locations are at the same location.
+   * @params: option.distance - distance between coordinates
+   *          option.unit - unit of measurement for distance
+   */
+  atSameLocation(location1, location2, option = {distance: 1, unit: 'miles'}) {
+    // Create a polygon around location1 and location2 and see if they intercept
+    var point1 = turf.point([location1['longitude'], location1['latitude']], {name: 'loc-1'});
+    var point2 = turf.point([location2['longitude'], location2['latitude']], {name: 'loc-2'});
+    var point2Vicinity = turf.buffer(point2, option.distance, option.unit);
+
+    return turf.inside(point1, point2Vicinity.features[0]);
   },
   onLongPress(location) {
     console.log('long pressed', location);
@@ -84,7 +92,7 @@ var MapboxMap = React.createClass({
         },
         id: 'destination'
       });
-    }
+    };
 
     AlertIOS.alert('Destination', 'Add Destination?', [
       {text: 'Yes, set destination', onPress: addDestination.bind(this), style: 'default'},
@@ -102,6 +110,8 @@ var MapboxMap = React.createClass({
 
     this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
 
+    // Fetches the friends from the database, creates a list of friends,
+    // and sends the list to the server to be added on the socket.friends for this user.
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
       this.friends = friendData;
       var friendIDs = friendData.map((friend) => {
@@ -109,25 +119,50 @@ var MapboxMap = React.createClass({
       });
       this.socket.emit('registerFriends', friendIDs);
     });
+
+    // Response to chat messages sent on socket
     this.socket.on('chat message', (msg) => {
       console.log('Woohoo it worked! ', msg);
     });
 
-    var connectedIDs = [];
+    /*
+     * A friend is within your radius. Handle a notification and renders the update.
+     * @params: notification.message - message to be communicated
+     *          notification.senderID - id of the sender
+     *          notification.recipientID - id of the person to be notified
+     */
+    this.socket.on('notification', (notification) => {
+      // TODO: Add a notification event like a push notification.
+      console.log('notification received');
+    });
 
+    var connectedIDs = []; // all friend ids that are currently connected
+
+    /*
+     * Indicates that user has changed locations.
+     * @params: changeInfo.id - users id
+     *          changeInfo.loc.longitude - longitude
+     *          changeInfo.loc.latitude - latitude
+     *          this.fiends.uid - user id of the friend
+     */
     this.socket.on('change location', (changeInfo) => {
       var id = changeInfo.id;
       var loc = changeInfo.loc;
 
-      /* Find appropriate friend to update map info */
+      // Compare my location radius to my end point's and if they intersect emit a notification
+      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket, {distance: 1, unit: 'miles'});
+
+      // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
       var friend;
       for (var i = 0; i < friends.length; i++) {
         if (friends[i].uid === id) {
           friend = friends[i];
+          // NOTE: Consideration, breaking out of the loop once the friend is found.
         }
       }
 
+      // Update connected friend's list with this friends id and send the user's current location
       if (connectedIDs.indexOf(id) < 0) {
         connectedIDs.push(id);
         this.emitLocation(this.state.currentLoc);
@@ -158,10 +193,13 @@ var MapboxMap = React.createClass({
       }
     });
 
+    /*
+     * When a friend logs off, remove the friend from this user's list of connected users.
+     */
     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
       connectedIDs.splice(connectedIDs.indexOf(id), 1);
-    })
+    });
 
     this.socket.on('found location', (loc) => {
       console.log('This is the loc from website: ', loc);
@@ -173,6 +211,22 @@ var MapboxMap = React.createClass({
       //   {method: 'get'})
       //   .then((res) => {console.log(res)});
     });
+  },
+  /*
+   * Determines if a user and a end-points' location intersect. If so,
+   * notifies the end-point that the user is within the vicinity.
+   * @params: myCoordinates - {longitude, latitude} of the user
+   *          endPointCoordinates - {longitude, latitude} of endPoint
+   *          endPointID - id of the end-point
+   *          socket - socket used to communicate to notification
+   *          option.distance - distance between coordinates
+   *          option.unit - unit of measurement for distance
+   */
+  checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket, option) {
+    if (this.atSameLocation(myCoordinates, endPointCoordinates, option)) {
+      // push notification that my location is near my endpoint
+      socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
+    }
   },
   render: function() {
     StatusBar.setHidden(true);
@@ -224,6 +278,5 @@ var styles = StyleSheet.create({
     marginTop: 50
   }
 });
-
 
 module.exports = MapboxMap;
