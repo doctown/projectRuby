@@ -50,6 +50,7 @@ class Profile extends Component{
     var that = this;
     api.getUserData(that.props.userInfo.uid)
       .then(function(res) {
+        console.log('user data:', res);
         that.setState({
           userData: res,
           isLoading: false
