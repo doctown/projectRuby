@@ -41,7 +41,7 @@ var MapboxMap = React.createClass({
         },
         id: 'marker1'
       }],
-      socket: io('http://127.0.0.1:4568', {jsonp: false})
+      socket: io('http://159.203.222.32:4568', {jsonp: false})
     };
   },
   onRegionChange(location) {
@@ -96,7 +96,7 @@ var MapboxMap = React.createClass({
   },
   componentDidMount(){
     this.setUserTrackingMode(mapRef, this.userTrackingMode.follow);
-    this.socket = io.connect('http://127.0.0.1:4568', {jsonp: false});
+    this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false});
     this.socket.emit('registerID', this.props.userInfo.uid);
 
     this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
