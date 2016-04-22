@@ -120,7 +120,7 @@ var MapboxMap = React.createClass({
           title: friend.name,
           subtitle: friend.status,
           annotationImage: {
-            url: 'http://findicons.com/files/icons/367/ifunny/128/dog.png',
+            url: friend.profileImageURL,
             height: 25,
             width: 25
           },
