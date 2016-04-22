@@ -6,6 +6,7 @@ import React, {
   StyleSheet,
   StatusBar,
   Dimensions,
+  AlertIOS
 } from 'react-native';
 import Mapbox from 'react-native-mapbox-gl';
 import io from 'socket.io-client/socket.io';
@@ -48,13 +49,12 @@ var MapboxMap = React.createClass({
     this.setState({ currentZoom: location.zoom });
   },
   onRegionWillChange(location) {
-    console.log(location);
+    // console.log(location);
   },
   emitLocation(location) {
     this.socket.emit('change location', location);
     console.log('updating location');
   },
-
   onUpdateUserLocation(location) {
     this.emitLocationThrottled(location);
     this.setState({currentLoc: location});
@@ -65,8 +65,32 @@ var MapboxMap = React.createClass({
   onRightAnnotationTapped(e) {
     console.log(e);
   },
+  atSameLocation() {
+    const precisionRadius = 1000;
+    return false;
+  },
   onLongPress(location) {
     console.log('long pressed', location);
+
+    var addDestination = function() {
+      this.updateAnnotation(mapRef, {
+        coordinates: [location.latitude, location.longitude],
+        'type': 'point',
+        title: 'Current Destination',
+        annotationImage: {
+          url: 'https://www.uniteller.com/images/Destination_Icon.png',
+          height: 40,
+          width: 50
+        },
+        id: 'destination'
+      });
+    }
+
+    AlertIOS.alert('Destination', 'Add Destination?', [
+      {text: 'Yes, set destination', onPress: addDestination.bind(this), style: 'default'},
+      {text: 'No, Cancel', onPress: () => { console.log('cancelled'); }, style: 'cancel'}
+      ]
+      );
   },
   onTap(location) {
     console.log('tapped', location);
