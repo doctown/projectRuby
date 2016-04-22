@@ -87,6 +87,24 @@ io.on('connection', function(socket) {
     }
   });
 
+  socket.on('set destination', (loc) => {
+    for (var i = 0; i < socket.friends.length; i++) {
+      var friendSocket = sockets[socket.friends[i]];
+      if (friendSocket) {
+        friendSocket.emit('set destination', {id: socket.id, loc: loc});
+      }
+    }
+  });
+
+  socket.on('remove destination', () => {
+    for (var i = 0; i < socket.friends.length; i++) {
+      var friendSocket = sockets[socket.friends[i]];
+      if (friendSocket) {
+        friendSocket.emit('remove destination', socket.id);
+      }
+    }
+  });
+
   socket.on('found location', (loc) => {
     console.log('This is another location: ', loc);
     io.emit('found location', loc);

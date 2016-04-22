@@ -57,6 +57,10 @@ var MapboxMap = React.createClass({
   onUpdateUserLocation(location) {
     this.emitLocationThrottled(location);
     this.setState({currentLoc: location});
+    if (this.atSameLocation(location, this.destination)) {
+      this.removeAnnotation(mapRef, 'destination');
+      this.emit('remove destination');
+    }
   },
   onOpenAnnotation(annotation) {
     console.log(annotation);
@@ -78,9 +82,8 @@ var MapboxMap = React.createClass({
     return turf.inside(point1, point2Vicinity.features[0]);
   },
   onLongPress(location) {
-    console.log('long pressed', location);
-
     var addDestination = function() {
+      this.destination = location;
       this.updateAnnotation(mapRef, {
         coordinates: [location.latitude, location.longitude],
         'type': 'point',
@@ -92,13 +95,30 @@ var MapboxMap = React.createClass({
         },
         id: 'destination'
       });
+
+      this.socket.emit('set destination', location);
     };
 
-    AlertIOS.alert('Destination', 'Add Destination?', [
-      {text: 'Yes, set destination', onPress: addDestination.bind(this), style: 'default'},
-      {text: 'No, Cancel', onPress: () => { console.log('cancelled'); }, style: 'cancel'}
-      ]
-      );
+    var removeDestination = function() {
+      delete this.destination;
+      this.removeAnnotation(mapRef, 'destination');
+      this.socket.emit('remove destination')
+    };
+
+    if (!this.destination) {
+      AlertIOS.alert('Destination', 'Add Destination?', [
+        {text: 'Yes, set destination', onPress: addDestination.bind(this), style: 'default'},
+        {text: 'No, Cancel', onPress: () => { console.log('cancelled'); }, style: 'cancel'}
+        ]
+        );
+    } else {
+      AlertIOS.alert('Destination', 'Update Destination?', [
+        {text: 'Yes, update destination', onPress: addDestination.bind(this), style: 'default'},
+        {text: 'Remove Destination', onPress: removeDestination.bind(this), style: 'default'},
+        {text: 'No, Cancel', onPress: () => { console.log('cancelled'); }, style: 'cancel'}
+        ]
+        );
+    }
   },
   onTap(location) {
     console.log('tapped', location);
@@ -172,25 +192,63 @@ var MapboxMap = React.createClass({
       var myLong = this.state.currentLoc.longitude;
       var lat = loc.latitude;
       var long = loc.longitude;
-      if (loc.latitude !== this.state.currentLoc.latitude) {
-        this.updateAnnotation(mapRef, {
-          coordinates: [lat, long],
-          'type': 'point',
-          title: friend.name,
-          subtitle: friend.status,
-          annotationImage: {
-            url: friend.profileImageURL,
-            height: 25,
-            width: 25
-          },
-          id: id
-        });
 
-        if (!this.state.boundSet) {
-          this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
-          this.state.boundSet = true;
+      this.updateAnnotation(mapRef, {
+        coordinates: [lat, long],
+        'type': 'point',
+        title: friend.name,
+        subtitle: friend.status,
+        annotationImage: {
+          url: friend.profileImageURL,
+          height: 25,
+          width: 25
+        },
+        id: id
+      });
+
+      if (!this.state.boundSet) {
+        this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
+        this.state.boundSet = true;
+      }
+    });
+
+    this.socket.on('set destination', (destinationInfo) => {
+      var id = destinationInfo.id;
+      var loc = destinationInfo.loc;
+
+      /* Find appropriate friend to update map info */
+      var friends = this.friends;
+      var friend;
+      for (var i = 0; i < friends.length; i++) {
+        if (friends[i].uid === id) {
+          friend = friends[i];
         }
       }
+
+      var myLat = this.state.currentLoc.latitude;
+      var myLong = this.state.currentLoc.longitude;
+      var lat = loc.latitude;
+      var long = loc.longitude;
+      this.updateAnnotation(mapRef, {
+        coordinates: [lat, long],
+        'type': 'point',
+        title: friend.name + '\'s destination',
+        annotationImage: {
+          url: 'http://www.xn--9dbccjlkfq.com/route-planner-widget/img/destination-icon.png',
+          height: 25,
+          width: 25
+        },
+        id: id + 'dest'
+      });
+
+      if (!this.state.boundSet) {
+        this.setVisibleCoordinateBoundsAnimated(mapRef, lat, long, myLat, myLong, 50, 50, 50, 50);
+        this.state.boundSet = true;
+      }
+    });
+
+    this.socket.on('remove destination', (id) => {
+      this.removeAnnotation(mapRef, id + 'dest');
     });
 
     /*
@@ -198,6 +256,7 @@ var MapboxMap = React.createClass({
      */
     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
+      this.removeAnnotation(mapRef, id + 'dest');
       connectedIDs.splice(connectedIDs.indexOf(id), 1);
     });
 
