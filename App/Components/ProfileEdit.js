@@ -1,5 +1,10 @@
+// TODO:
+//   Create image picker function in other sheet
+//   Import into this file
+//   Render/return the module
+
 var api = require('../Utils/api');
-var ImagePickerManager = require('NativeModules').ImagePickerManager;
+var ImagePicker = require('./ImagePicker');
 
 import React, {
   CameraRoll,
@@ -57,8 +62,6 @@ class ProfileEdit extends Component{
   render(){
     var userData = this.props.userData;
 
-    //add function here
-
     var topicArr = ['status','name', 'phone'];
     var list = topicArr.map((item, index) => {
         return (
@@ -82,7 +85,15 @@ class ProfileEdit extends Component{
     })
 
     return (
+      // <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
+      // <Image style={styles.badgeImage} source={{uri: userData.profileImageURL}} />
+
+        // <TouchableHighlight onPress={() => console.log('button pressed')}>
+        //   <Text>Edit Photo</Text>
+        // </TouchableHighlight>
+
       <View style={styles.container}>
+        <ImagePicker />
         <Text style={styles.changeText}>{this.state.updateAlert}</Text>
         {list}
       </View>
@@ -97,6 +108,13 @@ var styles = {
     paddingTop: 100,
     flexDirection: 'column',
     backgroundColor:'#498183'
+  },
+    badgeContainer: {
+    backgroundColor: '#498183',
+    paddingBottom: 10,
+    padding: 20,
+    marginTop: 55,
+    width: 400
   },
   button: {
     height: 25,
@@ -131,6 +149,7 @@ var styles = {
     alignSelf: 'stretch',
     justifyContent: 'center'
   }
+
 };
 
 module.exports = ProfileEdit;
