@@ -69,7 +69,7 @@ var MapboxMap = React.createClass({
    * @params: option.distance - distance between coordinates
    *          option.unit - unit of measurement for distance
    */
-  atSameLocation(location1, location2, option) {
+  atSameLocation(location1, location2, option = {distance: 1, unit: 'miles'}) {
     // Create a polygon around location1 and location2 and see if they intercept
     var point1 = turf.point([location1['longitude'], location1['latitude']], {name: 'loc-1'});
     var point2 = turf.point([location2['longitude'], location2['latitude']], {name: 'loc-2'});
