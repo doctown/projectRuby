@@ -63,9 +63,27 @@ class Profile extends Component{
 
   handleSubmit() {
     var statusUpdate = this.state.status;
+    console.log('status update: ', statusUpdate);
     this.setState({
       status: ''
     });
+    // TODO: Refactor below
+    // var item = item;
+    var myData = this.props.userInfo;
+    var that = this;
+    console.log(myData);
+
+    api.updateUserData(myData, 'status', statusUpdate);
+
+    // that.setState({
+    //   updateAlert: 'You have updated your info!'
+    // })
+
+    this.handleProfileRender('status', statusUpdate);
+
+    // setTimeout(function() {
+    //   that.setState({ updateAlert: '' })
+    // }, 1000);
     // send status updat to firbase with api
   }
 
@@ -82,7 +100,8 @@ class Profile extends Component{
             style={styles.searchInput}
             value={this.state.status}
             onChange={this.handleChange.bind(this)} //TODO: implement handleChange
-            placeholder="Update your status" />
+            placeholder="Update your status..."
+            placeholderTextColor="#498183" />
         <TouchableHighlight
             style={styles.button}
             onPress={this.handleSubmit.bind(this)}
@@ -197,17 +216,18 @@ var styles = {
     backgroundColor: '#E3E3E3',
     alignItems: 'center',
     flexDirection: 'row',
-    marginBottom: 20
+    marginBottom: 10
     // flex: 1
   },
   searchInput: {
     height: 60,
     width: 300,
     // flexDirection: 'row',
-    padding: 20,
+    padding: 15,
+    paddingLeft: 25,
     fontSize: 18,
-    color: '#111',
-    backgroundColor: 'orange'
+    color: '#498183',
+    backgroundColor: '#F0F4F5'
   },
   buttonText: {
     fontSize: 18,
@@ -216,7 +236,7 @@ var styles = {
   button: {
     height: 60,
     width: 100,
-    backgroundColor: '#48BBEC',
+    backgroundColor: '#498183',
     flex: 3,
     // flexDirection: 'row',
     alignItems: 'center',
