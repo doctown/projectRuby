@@ -41,16 +41,6 @@ class Friends extends Component{
     });
   }
 
-  friendOptions(rowData){
-    var rowData = rowData;
-    AlertIOS.alert('Friend Time!', 'Do you want to start a connection?', [
-      {text: 'No, View Profile', onPress: () => { this.viewFriend(rowData); }, style: 'default'},
-      {text: 'No, Cancel', onPress: () => { console.log('back to page'); }, style: 'default'},
-      {text: 'Yes, Start Connection', onPress: () => { this.startConnection(rowData); }, style: 'cancel'},
-      ]
-      );
-  }
-
   friendReqOptions(rowData){
     var rowData = rowData;
     var that = this;
@@ -98,7 +88,7 @@ class Friends extends Component{
             <View key={index}>
             <TouchableHighlight
             style={styles.rowContainer}
-            onPress={() => this.friendOptions(item)}
+            onPress={() => this.viewFriend(item)}
             underlayColor="#EEE">
             <View>
             <Image
