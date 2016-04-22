@@ -209,7 +209,8 @@ var MapboxMap = React.createClass({
   },
   /*
    * Determines if a user and a friends location intersect. If so,
-   * notifies the friend that the user is within the vicinity.
+   * notifies the friend that the user is within the vicinity. Finally disconnects from map and is removed
+   * from friends maps.
    * @params: myCoordinates - {longitude, latitude} of the user
    *          friendCoordinates - {longitude, latitude} of friend
    *          friendID - id of the friend
@@ -223,7 +224,8 @@ var MapboxMap = React.createClass({
     if (turf.inside(myLocation, friendVicinity.features[0])) {
       console.log('friends near each other');
       // push notification that my friend is near by
-      socket.emit('notification', {senderID: socket.id, recipientID: friendID, message: 'Within vicinity'})
+      socket.emit('notification', {senderID: socket.id, recipientID: friendID, message: 'Within vicinity'});
+      socket.emit('disconnect');
     }
   },
   render: function() {
