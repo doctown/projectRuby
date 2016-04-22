@@ -101,8 +101,8 @@ var MapboxMap = React.createClass({
 
     this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
 
-    // Fetch the friends from the database, create a list of friends,
-    // and send the list to the server to be added on the socket for this user.
+    // Fetches the friends from the database, creates a list of friends,
+    // and sends the list to the server to be added on the socket.friends for this user.
     api.getUserFriends(this.props.userInfo.uid).then((friendData) => {
       this.friends = friendData;
       var friendIDs = friendData.map((friend) => {
@@ -118,14 +118,16 @@ var MapboxMap = React.createClass({
 
     /*
      * A friend is within your radius. Handle a notification and renders the update.
-     * @param:
+     * @params: notification.message - message to be communicated
+     *          notification.senderID - id of the sender
+     *          notification.recipientID - id of the person to be notified
      */
-    this.socket.on('notification', (message) => {
-      // TODO: Add a notification event.
-      console.log('notification recieved');
+    this.socket.on('notification', (notification) => {
+      // TODO: Add a notification event like a push notification.
+      console.log('notification received');
     });
 
-    var connectedIDs = []; // all friend ids
+    var connectedIDs = []; // all friend ids that are currently connected
 
     /*
      * Indicates that user has changed locations.
@@ -138,24 +140,20 @@ var MapboxMap = React.createClass({
       var id = changeInfo.id;
       var loc = changeInfo.loc;
 
-      // TODO: Compare my radius to my friends and if they intersect emit a notification
-      this.checkProximityToFriend(this.state.currentLoc, loc, id, this.socket);
+      // Compare my radius to my end points and if they intersect emit a notification and disconnect
+      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket);
 
-      /*
-       * Find the appropriate friend that triggered the change and
-       * update the friends info on the map
-       */
+      // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
       var friend;
       for (var i = 0; i < friends.length; i++) {
         if (friends[i].uid === id) {
           friend = friends[i];
-          // TODO: Consider breaking out of the loop once the friend is found.
+          // NOTE: Consider breaking out of the loop once the friend is found.
         }
       }
 
-      // Adds the id of each connected friend and emits the user's
-      // current location
+      // Update connected friend's list with this friends id and send the user's current location
       if (connectedIDs.indexOf(id) < 0) {
         connectedIDs.push(id);
         this.emitLocation(this.state.currentLoc);
@@ -187,9 +185,7 @@ var MapboxMap = React.createClass({
     });
 
     /*
-     * When a friend logs off, remove them from this users list of
-     * connected users.
-     *
+     * When a friend logs off, remove the friend from this user's list of connected users.
      */
     this.socket.on('logoff', (id) => {
       this.removeAnnotation(mapRef, id);
@@ -208,23 +204,22 @@ var MapboxMap = React.createClass({
     });
   },
   /*
-   * Determines if a user and a friends location intersect. If so,
-   * notifies the friend that the user is within the vicinity. Finally disconnects from map and is removed
-   * from friends maps.
+   * Determines if a user and a end-points location intersect. If so,
+   * notifies the end-point that the user is within the vicinity. Finally disconnects from map and is removed
+   * from end-points maps.
    * @params: myCoordinates - {longitude, latitude} of the user
-   *          friendCoordinates - {longitude, latitude} of friend
-   *          friendID - id of the friend
+   *          endPointCoordinates - {longitude, latitude} of endPoint
+   *          endPointID - id of the end-point
    */
-  checkProximityToFriend: function(myCoordinates, friendCoordinates, friendID, socket) {
-    // Create a 1 mile polygon around user and friend and see if they intercept
+  checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket) {
+    // Create a 1 mile polygon around user and end-point and see if they intercept
     var myLocation = turf.point([myCoordinates['longitude'], myCoordinates['latitude']], {name: 'me'});
-    var friendLocation = turf.point([friendCoordinates['longitude'], friendCoordinates['latitude']], {name: 'friend'});
+    var endPointLocation = turf.point([endPointCoordinates['longitude'], endPointCoordinates['latitude']], {name: 'end-point'});
     var myVicinity = turf.buffer(myLocation, 1, 'miles');
-    var friendVicinity = turf.buffer(friendLocation, 1, 'miles');
-    if (turf.inside(myLocation, friendVicinity.features[0])) {
-      console.log('friends near each other');
-      // push notification that my friend is near by
-      socket.emit('notification', {senderID: socket.id, recipientID: friendID, message: 'Within vicinity'});
+    var endPointVicinity = turf.buffer(endPointLocation, 1, 'miles');
+    if (turf.inside(myLocation, endPointVicinity.features[0])) {
+      // push notification that my location is near my endpoint
+      socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
       socket.emit('disconnect');
     }
   },
