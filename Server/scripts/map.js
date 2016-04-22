@@ -1,4 +1,4 @@
-var socket = io.connect('http://159.203.222.32:4568');
+var socket = io.connect('http://159.203.222.32:4568, {jsonp: false, transports: ['websocket']});
 window.sapphireMap = {
   accessToken: 'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg',
   mapAccess: L.mapbox.accessToken = 'pk.eyJ1IjoiaW5qZXllbyIsImEiOiJHYUJMWGV3In0.-9Wcu6yJNQmem2IXWaRuIg',
