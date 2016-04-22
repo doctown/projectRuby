@@ -1,6 +1,7 @@
 var api = require('../Utils/api');
 var Separator = require('./Helpers/Separator');
 var Firebase = require('firebase');
+var Friends = require('./Friends');
 
 import React, {
   View,
@@ -33,32 +34,53 @@ class FriendsAdd extends Component{
 
   searchUsers(event) {
     var context = this;
+    var query = event.nativeEvent.text || '';
     this.setState({
-      // query: event.nativeEvent.text
-      isLoading: true
+      query: query,
+      // isLoading: true
     });
     // console.log(this.state.query);
-    var query = event.nativeEvent.text || '';
     var potentialMatches = [];
+    // var uid = this.props.userInfo.uid;
+    // console.log(this.props.friends);
+    var currentFriends = this.props.friends;
+    // console.log('current friends', currentFriends);
+    // var friendIds = currentFriends ? Object.values(currentFriends) : [];
+    var friendIds = currentFriends.map((friend) => friend.uid);
     var usersRef = new Firebase(`https://project-ruby.firebaseio.com/UserData`);
     usersRef.on('value', function(snap) {
       var users = snap.val();
       for (var uid in users) {
         var user = users[uid];
-        var name = users[uid].name;
+        var name = user.name;
+        // console.log(friendIds);
+        var email = user.email;
         user.uid = uid;
         // console.log('user is:', user);
         // console.log(typeof name);
         // console.log(name);
-        if (name) {
+        if (name && (friendIds.indexOf(user.uid) === -1)) {
           name = name.toLowerCase();
-          if (name.indexOf(query.toLowerCase()) > -1) {
+          if (name.indexOf(query.toLowerCase()) > -1 || email.indexOf(query.toLowerCase()) > -1) {
             console.log('found a potential match');
             potentialMatches.push(user);
+            context.setState({matches: potentialMatches});
           }
         }
+        // if (!potentialMatches.length) {
+        //   context.setState({
+        //     updateAlert: 'No matches found, try again',
+        //     matches: [],
+        //     isLoading: false
+        //   });
+        //   setTimeout(function() {
+        //     context.setState({ updateAlert: '' });
+        //   }, 1000);
+        // }
+
         context.setState({matches: potentialMatches, isLoading: false});
-        console.log('state match:', context.state.matches);
+        // console.log('state match:', context.state.matches);
+
         // compare name to query
           // if match, push user object into results
         // update
@@ -72,9 +94,9 @@ class FriendsAdd extends Component{
   }
 
   sendFriendRequest(event, match) {
-    for (var prop in this.props) {
-      console.log(prop, 'is', this.props[prop]);
-    }
+    // for (var prop in this.props) {
+    //   console.log(prop, 'is', this.props[prop]);
+    // }
     var userId = this.props.userInfo.uid;
     console.log('match is', match);
     var matchId = match.uid;// TODO: need to pass the new friends id right here, maybe as a parameter???
@@ -84,13 +106,15 @@ class FriendsAdd extends Component{
 
     that.setState({
       updateAlert: 'Friend Request Sent!',
-      foundFriend: false
+      foundFriend: false,
+      matches: []
     });
 
+    // this.goToFriendsView();
 
     setTimeout(function() {
-      that.setState({ updateAlert: '' });
-    }, 3000);
+      that.setState({ updateAlert: '' }); // TODO: route to another page
+    }, 1500);
   }
 
   searchForFriend(event) {
@@ -99,9 +123,9 @@ class FriendsAdd extends Component{
     var allFriends = that.props.allFriends;
     var foundFriend = false;
 
-    that.setState({
-      isLoading: true
-    });
+    // that.setState({
+    //   isLoading: true
+    // });
 
     if (allFriends.length > 0) {
       for (var i = 0; i < allFriends.length; i++) {
@@ -137,6 +161,16 @@ class FriendsAdd extends Component{
     setTimeout(function() {
       that.setState({ updateAlert: ''});
     }, 3000);
+  }
+
+  // TODO: attempts to rerender, but errors on line 112
+  goToFriendsView(){
+    var that = this;
+    that.props.navigator.push({
+      title: 'Friends',
+      component: Friends,
+      passProps: {userInfo: that.props.userInfo} //allFriends: that.state.friendData
+    });
   }
 
   render(){
@@ -204,7 +238,7 @@ class FriendsAdd extends Component{
       <View style={styles.container}>
         <Text style={styles.alertText}>{this.state.updateAlert}</Text>
         <View style={styles.rowContainer}>
-            <Text style={styles.rowTitle}> Search by Email Address </Text>
+            <Text style={styles.rowTitle}> Search for Friends </Text>
             <TextInput
               autoCapitalize='none'
               style={styles.searchInput}
@@ -216,9 +250,7 @@ class FriendsAdd extends Component{
               <Text style={styles.buttonText}> SEARCH </Text>
             </TouchableHighlight> */}
             </View>
-        <ScrollView
-          showsVerticalScrollIndicator={true}
-        >
+        <ScrollView showsVerticalScrollIndicator={true}>
         {loadingFriend}
         {friendDisplay}
         </ScrollView>
