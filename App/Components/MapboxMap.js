@@ -150,7 +150,7 @@ var MapboxMap = React.createClass({
       var loc = changeInfo.loc;
 
       // Compare my location radius to my end point's and if they intersect emit a notification
-      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket, {proximityOnly: false, distance: 1, unit: 'miles'});
+      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket, {distance: 1, unit: 'miles'});
 
       // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
