@@ -21,56 +21,6 @@ class Friends extends Component{
 
   constructor(props) {
     super(props);
-    this.state = {
-      isLoading: true,
-      updateAlert: '',
-      friendData: [],
-      friendReqData: []
-    };
-  }
-
-  handleFriendReqsRender(newFriend) {
-    var friendData = this.state.friendData;
-    friendData.push(newFriend.info);
-
-    this.setState({
-      friendData: friendData
-    });
-  }
-
-  componentWillMount() {
-    this.getAsyncData();
-  }
-
-  getAsyncData() {
-    var that = this;
-    api.getUserFriends(that.props.userInfo.uid)
-    .then(function(res) {
-      that.setState({
-        friendData: res,
-        isLoading: false
-      });
-    })
-    .catch(function(err) {
-      that.setState({
-        updateAlert: 'Add some friends to get started!',
-        isLoading: false
-      });
-    });
-
-    api.getUserFriendReqs(that.props.userInfo.uid)
-    .then(function(res) {
-      that.setState({
-        friendReqData: res,
-        isLoading: false
-      });
-    })
-    .catch(function(err) {
-      that.setState({
-        updateAlert: 'Add some friends to get started!',
-        isLoading: false
-      });
-    });
   }
 
   startConnection(rowData) {
@@ -114,7 +64,7 @@ class Friends extends Component{
   }
 
   acceptRequest(friend) {
-    api.addFriend(this.props.userInfo.uid, friend.uid, friend.reqId, this.getAsyncData.bind(this));
+    api.addFriend(this.props.userInfo.uid, friend.uid, friend.reqId, this.props.reload);
   }
 
   declineRequest(enemy) {
@@ -131,8 +81,7 @@ class Friends extends Component{
   }
 
   render(){
-
-    if (this.state.isLoading) {
+    if (this.props.isLoading) {
       return (
         <View style={styles.isLoadingContainer}>
         <Image style={styles.loadingImage} source={require('../Images/loading.gif')} />
@@ -140,8 +89,8 @@ class Friends extends Component{
         )
     } else {
       var user = this.props.userInfo;
-      var friends = this.state.friendData;
-      var friendReqs = this.state.friendReqData;
+      var friends = this.props.friendData;
+      var friendReqs = this.props.friendReqData;
 
       if (friends.length > 0) {
         var friendsView = friends.map((item, index) => {
@@ -194,7 +143,7 @@ class Friends extends Component{
 
       return (
         <View style={styles.container}>
-        <Text style={styles.alertText}>{this.state.updateAlert}</Text>
+        <Text style={styles.alertText}>{this.props.updateAlert}</Text>
         <TouchableHighlight onPress={() => this.addFriends()}>
         <Image style={styles.addFriendsImage} source={require('../Images/plus.png')} />
         </TouchableHighlight>
