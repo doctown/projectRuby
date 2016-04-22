@@ -76,7 +76,7 @@ class Friends extends Component{
     that.props.navigator.push({
       title: 'Add Friends',
       component: FriendsAdd,
-      passProps: {userInfo: that.props.userInfo, allFriends: that.state.friendData}
+      passProps: {userInfo: that.props.userInfo, friends: this.props.friendData} //allFriends: that.state.friendData
     });
   }
 

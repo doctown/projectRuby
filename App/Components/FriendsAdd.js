@@ -1,5 +1,7 @@
 var api = require('../Utils/api');
 var Separator = require('./Helpers/Separator');
+var Firebase = require('firebase');
+var Friends = require('./Friends');
 
 import React, {
   View,
@@ -19,7 +21,8 @@ class FriendsAdd extends Component{
     this.state = {
       updateAlert: '',
       isLoading: false,
-      foundFriend: false
+      foundFriend: false,
+      matches: []  // to store matches of search
     };
   }
 
@@ -29,33 +32,78 @@ class FriendsAdd extends Component{
     });
   }
 
-  sendFriendRequest() {
+  searchUsers(event) {
+    var context = this;
+    var query = event.nativeEvent.text || '';
+    this.setState({
+      query: query
+    });
+    // console.log(this.state.query);
+    var potentialMatches = [];
+    // console.log(this.props.friends);
+    var currentFriends = this.props.friends;
+    // console.log('current friends', currentFriends);
+    var friendIds = currentFriends.map((friend) => friend.uid);
+    var usersRef = new Firebase(`https://project-ruby.firebaseio.com/UserData`);
+    usersRef.on('value', function(snap) {
+      var users = snap.val();
+      for (var uid in users) {
+        var user = users[uid];
+        var name = user.name;
+        var email = user.email;
+        user.uid = uid;
+        // console.log('user is:', user);
+        // console.log(typeof name);
+        // console.log(name);
+        if (name && (friendIds.indexOf(user.uid) === -1)) {
+          name = name.toLowerCase();
+          if (name.indexOf(query.toLowerCase()) > -1 || email.indexOf(query.toLowerCase()) > -1) {
+            console.log('found a potential match');
+            potentialMatches.push(user);
+            context.setState({matches: potentialMatches});
+          }
+        }
+
+        context.setState({matches: potentialMatches, isLoading: false});
+        // console.log('state match:', context.state.matches);
+
+      }
+    });
+  }
+
+  sendFriendRequest(event, match) {
+    // for (var prop in this.props) {
+    //   console.log(prop, 'is', this.props[prop]);
+    // }
     var userId = this.props.userInfo.uid;
-    var friendId = this.state.newFriend[0].uid;
+    console.log('match is', match);
+    var matchId = match.uid;// TODO: need to pass the new friends id right here, maybe as a parameter???
     var that = this;
 
-    api.sendFriendRequest(userId, friendId);
+    api.sendFriendRequest(userId, matchId);
 
     that.setState({
       updateAlert: 'Friend Request Sent!',
-      foundFriend: false
+      foundFriend: false,
+      matches: []
     });
 
+    // this.goToFriendsView();
 
     setTimeout(function() {
-      that.setState({ updateAlert: '' });
-    }, 3000);
+      that.setState({ updateAlert: '' }); // TODO: route to another page
+    }, 1500);
   }
 
-  searchForFriend() {
+  searchForFriend(event) {
     var that = this;
     var friendEmail = that.state.friendEmail;
     var allFriends = that.props.allFriends;
     var foundFriend = false;
 
-    that.setState({
-      isLoading: true
-    });
+    // that.setState({
+    //   isLoading: true
+    // });
 
     if (allFriends.length > 0) {
       for (var i = 0; i < allFriends.length; i++) {
@@ -93,50 +141,39 @@ class FriendsAdd extends Component{
     }, 3000);
   }
 
+  // TODO: attempts to rerender, but errors on line 112
+  goToFriendsView(){
+    var that = this;
+    that.props.navigator.push({
+      title: 'Friends',
+      component: Friends,
+      passProps: {userInfo: that.props.userInfo} //allFriends: that.state.friendData
+    });
+  }
+
   render(){
+    var context = this;
+    var friendDisplay = this.state.matches ? this.state.matches.map((match, index) => {
 
-    if (this.state.foundFriend) {
+      return (
 
-      var friends = this.state.newFriend;
-      var allFriends = this.props.allFriends;
-      var friendList = [];
-      var that = this;
-
-      for (var i=0; i < friends.length; i++) {
-        var currentFriend = false;
-        for (var j=0; j < allFriends.length; j++) {
-          if (friends[i].info.email === allFriends[j].email) {
-            currentFriend = true;
-          }
-        }
-
-        if (currentFriend === false) {
-          friendList.push(friends[i]);
-        }
-      }
-
-      var friendDisplay = friendList.map((item, index) => {
-
-        return (
-
-          <View key={index}>
-            <View style={styles.listContainer}>
-            <Image
-              style={styles.image}
-              source={{uri: item.info.profileImageURL}} />
-            <Text style={styles.name}> {item.info.name} </Text>
-            <TouchableHighlight
-              style={styles.button}
-              onPress={this.sendFriendRequest.bind(this)}
-              underlayColor='white' >
-              <Text style={styles.buttonText}> ADD FRIEND </Text>
-            </TouchableHighlight>
-            </View>
-            <Separator />
+        <View key={index}>
+          <View style={styles.listContainer}>
+          <Image
+            style={styles.image}
+            source={{uri: match.profileImageURL}} />
+          <Text style={styles.name}> {match.name} </Text>
+          <TouchableHighlight
+            style={styles.button}
+            onPress={(event)=>context.sendFriendRequest(event, match)}
+            underlayColor='white' >
+            <Text style={styles.buttonText}> ADD FRIEND </Text>
+          </TouchableHighlight>
           </View>
-        )
-      })
-    }
+          <Separator />
+        </View>
+      )
+    }) : <View></View>;
 
     if (this.state.isLoading) {
       var loadingFriend = (
@@ -146,27 +183,25 @@ class FriendsAdd extends Component{
       )
     }
 
-    var userData = this.props.userData;
+    // var userData = this.props.userData;
 
     return (
       <View style={styles.container}>
         <Text style={styles.alertText}>{this.state.updateAlert}</Text>
         <View style={styles.rowContainer}>
-            <Text style={styles.rowTitle}> Search by Email Address </Text>
+            <Text style={styles.rowTitle}> Search for Friends </Text>
             <TextInput
               autoCapitalize='none'
               style={styles.searchInput}
-              onChange={(event)=>this.captureItemChange(event)} />
-            <TouchableHighlight
+              onChange={(event)=>this.searchUsers(event)} />
+            {/*<TouchableHighlight
               style={styles.button}
               onPress={()=>this.searchForFriend()}
               underlayColor='white' >
               <Text style={styles.buttonText}> SEARCH </Text>
-            </TouchableHighlight>
+            </TouchableHighlight> */}
             </View>
-        <ScrollView
-          showsVerticalScrollIndicator={true}
-        >
+        <ScrollView showsVerticalScrollIndicator={true}>
         {loadingFriend}
         {friendDisplay}
         </ScrollView>
