@@ -1,6 +1,8 @@
 var api = require('../Utils/api');
+var ImagePicker = require('./ImagePicker');
 
 import React, {
+  CameraRoll,
   View,
   Text,
   Image,
@@ -54,8 +56,8 @@ class ProfileEdit extends Component{
 
   render(){
     var userData = this.props.userData;
-    var topicArr = ['status','name', 'phone'];
 
+    var topicArr = ['status','name', 'phone'];
     var list = topicArr.map((item, index) => {
         return (
           <View key={index}>
@@ -78,7 +80,9 @@ class ProfileEdit extends Component{
     })
 
     return (
+
       <View style={styles.container}>
+        <ImagePicker />
         <Text style={styles.changeText}>{this.state.updateAlert}</Text>
         {list}
       </View>
@@ -93,6 +97,13 @@ var styles = {
     paddingTop: 100,
     flexDirection: 'column',
     backgroundColor:'#498183'
+  },
+    badgeContainer: {
+    backgroundColor: '#498183',
+    paddingBottom: 10,
+    padding: 20,
+    marginTop: 55,
+    width: 400
   },
   button: {
     height: 25,
@@ -127,6 +138,7 @@ var styles = {
     alignSelf: 'stretch',
     justifyContent: 'center'
   }
+
 };
 
 module.exports = ProfileEdit;
