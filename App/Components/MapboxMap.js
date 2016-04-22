@@ -64,8 +64,18 @@ var MapboxMap = React.createClass({
   onRightAnnotationTapped(e) {
     console.log(e);
   },
-  atSameLocation(location1, location2) {
-    return checkProximityToEndPoint({proximityOnly: true, distance: 1000, unit: 'feet'}, location1, location2);
+  /*
+   * Determines if two locations are at the same location.
+   * @params: option.distance - distance between coordinates
+   *          option.unit - unit of measurement for distance
+   */
+  atSameLocation(location1, location2, option) {
+    // Create a polygon around location1 and location2 and see if they intercept
+    var point1 = turf.point([location1['longitude'], location1['latitude']], {name: 'loc-1'});
+    var point2 = turf.point([location2['longitude'], location2['latitude']], {name: 'loc-2'});
+    var point2Vicinity = turf.buffer(point2, option.distance, option.unit);
+
+    return turf.inside(point1, point2Vicinity.features[0]);
   },
   onLongPress(location) {
     console.log('long pressed', location);
@@ -139,8 +149,8 @@ var MapboxMap = React.createClass({
       var id = changeInfo.id;
       var loc = changeInfo.loc;
 
-      // Compare my radius to my end points and if they intersect emit a notification and disconnect
-      this.checkProximityToEndPoint({proximityOnly: false, distance: 1, unit: 'miles'}, this.state.currentLoc, loc, id, this.socket);
+      // Compare my location radius to my end point's and if they intersect emit a notification
+      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket, {proximityOnly: false, distance: 1, unit: 'miles'});
 
       // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
@@ -203,30 +213,19 @@ var MapboxMap = React.createClass({
     });
   },
   /*
-   * Determines if a user and a end-points location intersect. If so,
-   * notifies the end-point that the user is within the vicinity. Finally disconnects from map and is removed
-   * from end-points maps.
-   * @params: option.proximityOnly - true if only proximity is noted
-   *          option.distance - distance between coordinates
-   *          option.unit - unit of measurement for distance
-   *          myCoordinates - {longitude, latitude} of the user
+   * Determines if a user and a end-points' location intersect. If so,
+   * notifies the end-point that the user is within the vicinity.
+   * @params: myCoordinates - {longitude, latitude} of the user
    *          endPointCoordinates - {longitude, latitude} of endPoint
    *          endPointID - id of the end-point
+   *          socket - socket used to communicate to notification
+   *          option.distance - distance between coordinates
+   *          option.unit - unit of measurement for distance
    */
-  checkProximityToEndPoint: function(option, myCoordinates, endPointCoordinates, endPointID, socket) {
-    // Create a polygon around user and end-point and see if they intercept
-    var myLocation = turf.point([myCoordinates['longitude'], myCoordinates['latitude']], {name: 'me'});
-    var endPointLocation = turf.point([endPointCoordinates['longitude'], endPointCoordinates['latitude']], {name: 'end-point'});
-    var myVicinity = turf.buffer(myLocation, .5, 'miles');
-    var endPointVicinity = turf.buffer(endPointLocation, option.distance, option.unit);
-    if (option.proximityOnly) {
-      return turf.inside(myLocation, endPointVicinity.features[0]);
-    } else {
-      if (turf.inside(myLocation, endPointVicinity.features[0])) {
-        // push notification that my location is near my endpoint
-        socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
-        //socket.emit('disconnect');
-      }
+  checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket, option) {
+    if (this.atSameLocation(myCoordinates, endPointCoordinates, option)) {
+      // push notification that my location is near my endpoint
+      socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
     }
   },
   render: function() {
