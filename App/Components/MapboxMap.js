@@ -9,8 +9,8 @@ import React, {
   AlertIOS
 } from 'react-native';
 import Mapbox from 'react-native-mapbox-gl';
-import io from 'socket.io-client/socket.io';
 window.navigator.userAgent = "react-native";
+let io = require('socket.io-client/socket.io');
 
 var api = require('../Utils/api');
 var turf = require('turf');
