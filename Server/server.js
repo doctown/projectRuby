@@ -79,12 +79,6 @@ io.on('connection', function(socket) {
    *          loc.longitude - new user longitude
    */
   socket.on('change location', (loc) => {
-    /* TESTING PURPOSES
-    console.log('My socket is ', socket.id);
-    socket.emit('change location',  {id: socket.id, loc: loc});
-     END OF TESTING
-    */
-
     for (var i = 0; i < socket.friends.length; i++) {
       var friendSocket = sockets[socket.friends[i]];
       if (friendSocket) {

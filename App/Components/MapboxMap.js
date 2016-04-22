@@ -64,9 +64,8 @@ var MapboxMap = React.createClass({
   onRightAnnotationTapped(e) {
     console.log(e);
   },
-  atSameLocation() {
-    const precisionRadius = 1000;
-    return false;
+  atSameLocation(location1, location2) {
+    return checkProximityToEndPoint({proximityOnly: true, distance: 1000, unit: 'feet'}, location1, location2);
   },
   onLongPress(location) {
     console.log('long pressed', location);
@@ -83,7 +82,7 @@ var MapboxMap = React.createClass({
         },
         id: 'destination'
       });
-    }
+    };
 
     AlertIOS.alert('Destination', 'Add Destination?', [
       {text: 'Yes, set destination', onPress: addDestination.bind(this), style: 'default'},
@@ -141,7 +140,7 @@ var MapboxMap = React.createClass({
       var loc = changeInfo.loc;
 
       // Compare my radius to my end points and if they intersect emit a notification and disconnect
-      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket);
+      this.checkProximityToEndPoint({proximityOnly: false, distance: 1, unit: 'miles'}, this.state.currentLoc, loc, id, this.socket);
 
       // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
@@ -149,7 +148,7 @@ var MapboxMap = React.createClass({
       for (var i = 0; i < friends.length; i++) {
         if (friends[i].uid === id) {
           friend = friends[i];
-          // NOTE: Consider breaking out of the loop once the friend is found.
+          // NOTE: Consideration, breaking out of the loop once the friend is found.
         }
       }
 
@@ -207,20 +206,27 @@ var MapboxMap = React.createClass({
    * Determines if a user and a end-points location intersect. If so,
    * notifies the end-point that the user is within the vicinity. Finally disconnects from map and is removed
    * from end-points maps.
-   * @params: myCoordinates - {longitude, latitude} of the user
+   * @params: option.proximityOnly - true if only proximity is noted
+   *          option.distance - distance between coordinates
+   *          option.unit - unit of measurement for distance
+   *          myCoordinates - {longitude, latitude} of the user
    *          endPointCoordinates - {longitude, latitude} of endPoint
    *          endPointID - id of the end-point
    */
-  checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket) {
-    // Create a 1 mile polygon around user and end-point and see if they intercept
+  checkProximityToEndPoint: function(option, myCoordinates, endPointCoordinates, endPointID, socket) {
+    // Create a polygon around user and end-point and see if they intercept
     var myLocation = turf.point([myCoordinates['longitude'], myCoordinates['latitude']], {name: 'me'});
     var endPointLocation = turf.point([endPointCoordinates['longitude'], endPointCoordinates['latitude']], {name: 'end-point'});
-    var myVicinity = turf.buffer(myLocation, 1, 'miles');
-    var endPointVicinity = turf.buffer(endPointLocation, 1, 'miles');
-    if (turf.inside(myLocation, endPointVicinity.features[0])) {
-      // push notification that my location is near my endpoint
-      socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
-      socket.emit('disconnect');
+    var myVicinity = turf.buffer(myLocation, .5, 'miles');
+    var endPointVicinity = turf.buffer(endPointLocation, option.distance, option.unit);
+    if (option.proximityOnly) {
+      return turf.inside(myLocation, endPointVicinity.features[0]);
+    } else {
+      if (turf.inside(myLocation, endPointVicinity.features[0])) {
+        // push notification that my location is near my endpoint
+        socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
+        //socket.emit('disconnect');
+      }
     }
   },
   render: function() {
