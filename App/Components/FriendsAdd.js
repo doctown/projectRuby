@@ -36,16 +36,13 @@ class FriendsAdd extends Component{
     var context = this;
     var query = event.nativeEvent.text || '';
     this.setState({
-      query: query,
-      // isLoading: true
+      query: query
     });
     // console.log(this.state.query);
     var potentialMatches = [];
-    // var uid = this.props.userInfo.uid;
     // console.log(this.props.friends);
     var currentFriends = this.props.friends;
     // console.log('current friends', currentFriends);
-    // var friendIds = currentFriends ? Object.values(currentFriends) : [];
     var friendIds = currentFriends.map((friend) => friend.uid);
     var usersRef = new Firebase(`https://project-ruby.firebaseio.com/UserData`);
     usersRef.on('value', function(snap) {
@@ -53,7 +50,6 @@ class FriendsAdd extends Component{
       for (var uid in users) {
         var user = users[uid];
         var name = user.name;
-        // console.log(friendIds);
         var email = user.email;
         user.uid = uid;
         // console.log('user is:', user);
@@ -67,30 +63,12 @@ class FriendsAdd extends Component{
             context.setState({matches: potentialMatches});
           }
         }
-        // if (!potentialMatches.length) {
-        //   context.setState({
-        //     updateAlert: 'No matches found, try again',
-        //     matches: [],
-        //     isLoading: false
-        //   });
-        //   setTimeout(function() {
-        //     context.setState({ updateAlert: '' });
-        //   }, 1000);
-        // }
 
         context.setState({matches: potentialMatches, isLoading: false});
         // console.log('state match:', context.state.matches);
 
-        // compare name to query
-          // if match, push user object into results
-        // update
       }
     });
-    // console.log('Users:',users);
-    // var aUser = api.getUserData('122d7551-2cc5-4a62-b8b8-408b7198cb9e')
-    //   .then(function(user) {
-    //     console.log('just one', user);
-    // });
   }
 
   sendFriendRequest(event, match) {
@@ -174,11 +152,6 @@ class FriendsAdd extends Component{
   }
 
   render(){
-    //TODO: input logic for if state of matches
-    // if matches is truthy, has length
-    //   create friends elements and display
-    // else
-    //   no matches
     var context = this;
     var friendDisplay = this.state.matches ? this.state.matches.map((match, index) => {
 
@@ -201,28 +174,6 @@ class FriendsAdd extends Component{
         </View>
       )
     }) : <View></View>;
-
-    if (this.state.foundFriend) {
-
-      // var friends = this.state.newFriend;
-      // var allFriends = this.props.allFriends;
-      // var friendList = [];
-      // var that = this;
-
-      // for (var i=0; i < friends.length; i++) {
-      //   var currentFriend = false;
-      //   for (var j=0; j < allFriends.length; j++) {
-      //     if (friends[i].info.email === allFriends[j].email) {
-      //       currentFriend = true;
-      //     }
-      //   }
-      //   // adds anybody not already friends to friendList
-      //   if (currentFriend === false) {
-      //     friendList.push(friends[i]);
-      //   }
-      // }
-
-    }
 
     if (this.state.isLoading) {
       var loadingFriend = (
