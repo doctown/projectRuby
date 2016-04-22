@@ -20,15 +20,6 @@ class ProfileFriend extends Component{
     };
   }
 
-  startConnection() {
-    var that = this;
-    this.props.navigator.push({
-      title: 'Connection',
-      component: Connections,
-      passProps: {friendData: that.props.friendData}
-    });
-  }
-
   getRowTitle(user, item) {
     item = item;
     return item[0] ? item[0].toUpperCase() + item.slice(1) : item;
@@ -42,58 +33,52 @@ class ProfileFriend extends Component{
     var that = this;
     //change to friend data uid
     api.getUserData(that.props.friendData.uid)
-      .then(function(res) { 
-        that.setState({
-          friendData: res,
-          isLoading: false
-        })
+    .then(function(res) {
+      that.setState({
+        friendData: res,
+        isLoading: false
       })
-      .catch((err) => console.log(err))
+    })
+    .catch((err) => console.log(err))
   }
 
   render(){
     if (this.state.isLoading) {
       return (
         <View style={styles.isLoadingContainer}>
-          <Image style={styles.loadingImage} source={require('../Images/loading.gif')} />
+        <Image style={styles.loadingImage} source={require('../Images/loading.gif')} />
         </View>
-      )
+        )
     } else {
       var friendData = this.state.friendData;
       var topicArr = ['email', 'phone'];
-      
+
       var list = topicArr.map((item, index) => {
         if(!friendData[item]) {
           return
-            <View key={index} />
+          <View key={index} />
         } else {
           return (
             <View key={index}>
-              <View style={styles.rowContainer}>
-                <Text style={styles.rowTitle}> {this.getRowTitle(friendData, item)} </Text>
-                <Text style={styles.rowContent}> {friendData[item]} </Text>
-              </View>
+            <View style={styles.rowContainer}>
+            <Text style={styles.rowTitle}> {this.getRowTitle(friendData, item)} </Text>
+            <Text style={styles.rowContent}> {friendData[item]} </Text>
             </View>
-          )
+            </View>
+            )
         }
       })
       return (
         <View>
-          <View style={styles.badgeContainer}>
-            <Image style={styles.badgeImage} source={{uri: friendData.profileImageURL}} />
-            <Text style={styles.badgeName}> {friendData.name}</Text>
-          </View>
-          <View style={styles.container}>
-            <TouchableHighlight
-              style={styles.button}
-              onPress={this.startConnection.bind(this)}
-              underlayColor='white' >
-              <Text style={styles.buttonText}> CONNECT </Text>
-            </TouchableHighlight>
-            {list}
-          </View>
+        <View style={styles.badgeContainer}>
+        <Image style={styles.badgeImage} source={{uri: friendData.profileImageURL}} />
+        <Text style={styles.badgeName}> {friendData.name}</Text>
         </View>
-      )
+        <View style={styles.container}>
+        {list}
+        </View>
+        </View>
+        )
     }
   }
 }
