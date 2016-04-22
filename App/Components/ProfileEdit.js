@@ -1,8 +1,3 @@
-// TODO:
-//   Create image picker function in other sheet
-//   Import into this file
-//   Render/return the module
-
 var api = require('../Utils/api');
 var ImagePicker = require('./ImagePicker');
 
@@ -85,12 +80,6 @@ class ProfileEdit extends Component{
     })
 
     return (
-      // <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
-      // <Image style={styles.badgeImage} source={{uri: userData.profileImageURL}} />
-
-        // <TouchableHighlight onPress={() => console.log('button pressed')}>
-        //   <Text>Edit Photo</Text>
-        // </TouchableHighlight>
 
       <View style={styles.container}>
         <ImagePicker />

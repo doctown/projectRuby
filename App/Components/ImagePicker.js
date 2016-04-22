@@ -10,9 +10,6 @@ import React, {
   Component,
   ScrollView,
   TouchableHighlight,
-  // NativeModules: {
-  //   ImagePickerManager
-  // },
   TextInput
 } from 'react-native';
 
@@ -66,60 +63,16 @@ class ImagePicker extends Component {
     });
   }
 
-  // selectVideoTapped() {
-  //   const options = {
-  //     title: 'Video Picker',
-  //     takePhotoButtonTitle: 'Take Video...',
-  //     mediaType: 'video',
-  //     videoQuality: 'medium'
-  //   };
-
-  //   ImagePickerManager.showImagePicker(options, (response) => {
-  //     console.log('Response = ', response);
-
-  //     if (response.didCancel) {
-  //       console.log('User cancelled video picker');
-  //     }
-  //     else if (response.error) {
-  //       console.log('ImagePickerManager Error: ', response.error);
-  //     }
-  //     else if (response.customButton) {
-  //       console.log('User tapped custom button: ', response.customButton);
-  //     }
-  //     else {
-  //       this.setState({
-  //         videoSource: response.uri
-  //       });
-  //     }
-  //   });
-  // }
-        // <TouchableOpacity onPress={() => console.log('inside image picker module')}>
-        // </TouchableOpacity>
-          // <Text>image picker text</Text>
-
   render() {
     return (
       <View style={styles.container}>
         <TouchableHighlight onPress={this.selectPhotoTapped.bind(this)}>
-          <Text>Edit Photo</Text>
+          <View>
+          {this.state.avatarSource === null ? <Text>Edit Photo</Text>:<Image style={styles.avatar} source={this.state.avatarSource} />}
+          </View>
         </TouchableHighlight>
       </View>
-        // {this.selectPhotoTapped.bind(this)}>
-          // <View style={[styles.avatar, styles.avatarContainer, {marginBottom: 20}]}>
-          // { this.state.avatarSource === null ? <Text>Select a Photo</Text> :
-          //   <Image style={styles.avatar} source={this.state.avatarSource} />
-          // }
-          // </View>
 
-        // <TouchableOpacity onPress={this.selectVideoTapped.bind(this)}>
-        //   <View style={[styles.avatar, styles.avatarContainer]}>
-        //     <Text>Select a Video</Text>
-        //   </View>
-        // </TouchableOpacity>
-
-        // { this.state.videoSource &&
-        //   <Text style={{margin: 8, textAlign: 'center'}}>{this.state.videoSource}</Text>
-        // }
     );
   }
 
@@ -134,7 +87,6 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     borderColor: '#9B9B9B',
-    // borderWidth: 1 / PixelRatio.get(),
     justifyContent: 'center',
     alignItems: 'center'
   },
