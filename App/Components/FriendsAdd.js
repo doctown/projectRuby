@@ -1,5 +1,6 @@
 var api = require('../Utils/api');
 var Separator = require('./Helpers/Separator');
+var Firebase = require('firebase');
 
 import React, {
   View,
@@ -29,6 +30,26 @@ class FriendsAdd extends Component{
     });
   }
 
+  searchUsers(event) {
+    // this.setState({
+    //   query: event.nativeEvent.text
+    // });
+    // console.log(this.state.query);
+    var query = event.nativeEvent.text;
+    var usersRef = new Firebase(`https://project-ruby.firebaseio.com/UserData`);
+    usersRef.on('value', function(snap) {
+      var users = snap.val();
+      for (var uid in users) {
+        console.log(users[uid].name);
+      }
+    });
+    // console.log('Users:',users);
+    // var aUser = api.getUserData('122d7551-2cc5-4a62-b8b8-408b7198cb9e')
+    //   .then(function(user) {
+    //     console.log('just one', user);
+    // });
+  }
+
   sendFriendRequest() {
     var userId = this.props.userInfo.uid;
     var friendId = this.state.newFriend[0].uid;
@@ -47,7 +68,7 @@ class FriendsAdd extends Component{
     }, 3000);
   }
 
-  searchForFriend() {
+  searchForFriend(event) {
     var that = this;
     var friendEmail = that.state.friendEmail;
     var allFriends = that.props.allFriends;
@@ -156,13 +177,13 @@ class FriendsAdd extends Component{
             <TextInput
               autoCapitalize='none'
               style={styles.searchInput}
-              onChange={(event)=>this.captureItemChange(event)} />
-            <TouchableHighlight
+              onChange={(event)=>this.searchUsers(event)} />
+            {/*<TouchableHighlight
               style={styles.button}
               onPress={()=>this.searchForFriend()}
               underlayColor='white' >
               <Text style={styles.buttonText}> SEARCH </Text>
-            </TouchableHighlight>
+            </TouchableHighlight> */}
             </View>
         <ScrollView
           showsVerticalScrollIndicator={true}
