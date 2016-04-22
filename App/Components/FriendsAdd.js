@@ -20,7 +20,8 @@ class FriendsAdd extends Component{
     this.state = {
       updateAlert: '',
       isLoading: false,
-      foundFriend: false
+      foundFriend: false,
+      matches: []  // to store matches of search
     };
   }
 
@@ -31,16 +32,36 @@ class FriendsAdd extends Component{
   }
 
   searchUsers(event) {
-    // this.setState({
-    //   query: event.nativeEvent.text
-    // });
+    var context = this;
+    this.setState({
+      // query: event.nativeEvent.text
+      isLoading: true
+    });
     // console.log(this.state.query);
-    var query = event.nativeEvent.text;
+    var query = event.nativeEvent.text || '';
+    var potentialMatches = [];
     var usersRef = new Firebase(`https://project-ruby.firebaseio.com/UserData`);
     usersRef.on('value', function(snap) {
       var users = snap.val();
       for (var uid in users) {
-        console.log(users[uid].name);
+        var user = users[uid];
+        var name = users[uid].name;
+        user.uid = uid;
+        // console.log('user is:', user);
+        // console.log(typeof name);
+        // console.log(name);
+        if (name) {
+          name = name.toLowerCase();
+          if (name.indexOf(query.toLowerCase()) > -1) {
+            console.log('found a potential match');
+            potentialMatches.push(user);
+          }
+        }
+        context.setState({matches: potentialMatches, isLoading: false});
+        console.log('state match:', context.state.matches);
+        // compare name to query
+          // if match, push user object into results
+        // update
       }
     });
     // console.log('Users:',users);
@@ -50,12 +71,16 @@ class FriendsAdd extends Component{
     // });
   }
 
-  sendFriendRequest() {
+  sendFriendRequest(event, match) {
+    for (var prop in this.props) {
+      console.log(prop, 'is', this.props[prop]);
+    }
     var userId = this.props.userInfo.uid;
-    var friendId = this.state.newFriend[0].uid;
+    console.log('match is', match);
+    var matchId = match.uid;// TODO: need to pass the new friends id right here, maybe as a parameter???
     var that = this;
 
-    api.sendFriendRequest(userId, friendId);
+    api.sendFriendRequest(userId, matchId);
 
     that.setState({
       updateAlert: 'Friend Request Sent!',
@@ -115,48 +140,54 @@ class FriendsAdd extends Component{
   }
 
   render(){
+    //TODO: input logic for if state of matches
+    // if matches is truthy, has length
+    //   create friends elements and display
+    // else
+    //   no matches
+    var context = this;
+    var friendDisplay = this.state.matches ? this.state.matches.map((match, index) => {
+
+      return (
+
+        <View key={index}>
+          <View style={styles.listContainer}>
+          <Image
+            style={styles.image}
+            source={{uri: match.profileImageURL}} />
+          <Text style={styles.name}> {match.name} </Text>
+          <TouchableHighlight
+            style={styles.button}
+            onPress={(event)=>context.sendFriendRequest(event, match)}
+            underlayColor='white' >
+            <Text style={styles.buttonText}> ADD FRIEND </Text>
+          </TouchableHighlight>
+          </View>
+          <Separator />
+        </View>
+      )
+    }) : <View></View>;
 
     if (this.state.foundFriend) {
 
-      var friends = this.state.newFriend;
-      var allFriends = this.props.allFriends;
-      var friendList = [];
-      var that = this;
+      // var friends = this.state.newFriend;
+      // var allFriends = this.props.allFriends;
+      // var friendList = [];
+      // var that = this;
 
-      for (var i=0; i < friends.length; i++) {
-        var currentFriend = false;
-        for (var j=0; j < allFriends.length; j++) {
-          if (friends[i].info.email === allFriends[j].email) {
-            currentFriend = true;
-          }
-        }
+      // for (var i=0; i < friends.length; i++) {
+      //   var currentFriend = false;
+      //   for (var j=0; j < allFriends.length; j++) {
+      //     if (friends[i].info.email === allFriends[j].email) {
+      //       currentFriend = true;
+      //     }
+      //   }
+      //   // adds anybody not already friends to friendList
+      //   if (currentFriend === false) {
+      //     friendList.push(friends[i]);
+      //   }
+      // }
 
-        if (currentFriend === false) {
-          friendList.push(friends[i]);
-        }
-      }
-
-      var friendDisplay = friendList.map((item, index) => {
-
-        return (
-
-          <View key={index}>
-            <View style={styles.listContainer}>
-            <Image
-              style={styles.image}
-              source={{uri: item.info.profileImageURL}} />
-            <Text style={styles.name}> {item.info.name} </Text>
-            <TouchableHighlight
-              style={styles.button}
-              onPress={this.sendFriendRequest.bind(this)}
-              underlayColor='white' >
-              <Text style={styles.buttonText}> ADD FRIEND </Text>
-            </TouchableHighlight>
-            </View>
-            <Separator />
-          </View>
-        )
-      })
     }
 
     if (this.state.isLoading) {
@@ -167,7 +198,7 @@ class FriendsAdd extends Component{
       )
     }
 
-    var userData = this.props.userData;
+    // var userData = this.props.userData;
 
     return (
       <View style={styles.container}>
