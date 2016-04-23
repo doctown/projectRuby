@@ -22,6 +22,7 @@ var MapboxMap = React.createClass({
   mixins: [Mapbox.Mixin],
   getInitialState() {
     return {
+      showLocation: false,
       zoom: 17,
       boundSet: false,
       currentLoc: undefined,
@@ -129,6 +130,7 @@ var MapboxMap = React.createClass({
     console.log('tapped', location);
   },
   componentDidMount(){
+    this.sendShowLocation();
     this.setUserTrackingMode(mapRef, this.userTrackingMode.follow);
     this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false, transports: ['websocket']});
     this.socket.emit('registerID', this.props.userInfo.uid);
@@ -292,6 +294,15 @@ var MapboxMap = React.createClass({
       socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
     }
   },
+
+  sendShowLocation() {
+    this.setState({showLocation: !this.state.showLocation});
+    console.log('sending showLocation to DB:', this.state.showLocation);
+    var user = this.props.userInfo;
+    console.log('user is:', user);
+    api.updateUserData(user, 'showLocation', ''+this.state.showLocation);
+  },
+
   render: function() {
     StatusBar.setHidden(true);
     return (
@@ -319,7 +330,7 @@ var MapboxMap = React.createClass({
       onTap={this.onTap} />
       <Text style={styles.overlayText}>Share Location</Text>
       <Switch
-        onValueChange={() => this.setState({showLocation: !this.state.showLocation})}
+        onValueChange={() => this.sendShowLocation()}
         style={styles.overlayLocationSwitch}
         value={this.state.showLocation}
         onTintColor="black"
