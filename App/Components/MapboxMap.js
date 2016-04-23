@@ -2,6 +2,7 @@ import React, {
   View,
   Component,
   Text,
+  Image,
   TouchableHighlight,
   StyleSheet,
   StatusBar,
@@ -330,12 +331,15 @@ var MapboxMap = React.createClass({
       onTap={this.onTap} />
       <Text style={styles.overlayText}>Share Location</Text>
       <Switch
-        onValueChange={() => this.sendShowLocation()}
-        style={styles.overlayLocationSwitch}
-        value={this.state.showLocation}
-        onTintColor="black"
-        thumbTintColor="white"
-        tintColor="white" />
+      onValueChange={() => this.sendShowLocation()}
+      style={styles.overlayLocationSwitch}
+      value={this.state.showLocation}
+      onTintColor="black"
+      thumbTintColor="white"
+      tintColor="white" />
+      <TouchableHighlight onPress={() => this.setCenterCoordinateAnimated(mapRef, this.state.currentLoc.latitude, this.state.currentLoc.longitude)}style={styles.compassContainer}>
+      <Image style={styles.compass} source={require('../Images/compass.png')} />
+      </TouchableHighlight>
       </View>
       );
   }
@@ -361,29 +365,48 @@ var styles = StyleSheet.create({
     marginTop: 50
   },
   overlayLocationSwitch: {
-     flex: 1,
-     position: 'absolute',
-     top: 18,
-     left: 305,
-     opacity: 0.5,
-     width: width,
-     height: 45
-   },
-   overlayText: {
-    position: 'absolute',
-    width: 355,
-    height: 45,
-    top: 10,
-    left: 10,
-    opacity: 0.8,
-    fontSize: 20,
-    padding: 8,
-    textAlign: 'center',
-    backgroundColor: '#498183',
-    borderRadius: 8,
-    color: 'white',
-    fontWeight: 'bold'
-   }
+   flex: 1,
+   position: 'absolute',
+   top: 18,
+   left: 305,
+   opacity: 0.5,
+   width: width,
+   height: 45
+ },
+ overlayText: {
+  position: 'absolute',
+  width: 355,
+  height: 45,
+  top: 10,
+  left: 10,
+  opacity: 0.8,
+  fontSize: 20,
+  padding: 8,
+  textAlign: 'center',
+  backgroundColor: '#498183',
+  borderRadius: 8,
+  color: 'white',
+  fontWeight: 'bold'
+},
+compassContainer: {
+  position: 'absolute',
+  bottom: 55,
+  right: 7,
+  backgroundColor: '#498183',
+  height: 45,
+  width: 45,
+  borderRadius: 5,
+  borderColor: '#333',
+  borderWidth: 1
+},
+compass: {
+  height: 35,
+  width: 35,
+  position: 'relative',
+  top: 5,
+  left: 4,
+  backgroundColor: 'transparent'
+}
 });
 
 module.exports = MapboxMap;
