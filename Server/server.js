@@ -1,7 +1,6 @@
 var app = require('express')();
 var server = require('http').createServer(app);
 var bodyParser = require('body-parser');
-var _ = require('underscore');
 var io = require('socket.io').listen(server);
 var smsNotification = require('./scripts/notifications');
 
@@ -37,13 +36,6 @@ app.get('/scripts/directions.js', function(req, res) {
 app.get('/map', function(req, res) {
   res.sendFile(__dirname + '/map.html');
 });
-
-/*
-app.get('/testNotification', function(req, res) {
-  smsNotification.sendSMSNotification('5617019861', '15612473337', 'test');
-  res.status(200).end();
-});
-*/
 
 app.post('/connect',
   function(req, res) {
