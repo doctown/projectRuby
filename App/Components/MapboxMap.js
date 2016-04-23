@@ -135,8 +135,9 @@ var MapboxMap = React.createClass({
     this.setUserTrackingMode(mapRef, this.userTrackingMode.follow);
     this.socket = io.connect('http://159.203.222.32:4568', {jsonp: false, transports: ['websocket']});
     this.socket.emit('registerID', this.props.userInfo.uid);
-
     this.emitLocationThrottled = _.throttle(this.emitLocation, 15000);
+    var smsNotificationFrequency = 60 * 1000;
+    this.debouncedSendNotification = _.debounce(this.sendUserSMSNotification, smsNotificationFrequency, true);
 
     // Fetches the friends from the database, creates a list of friends,
     // and sends the list to the server to be added on the socket.friends for this user.
@@ -178,7 +179,7 @@ var MapboxMap = React.createClass({
       var loc = changeInfo.loc;
 
       // Compare my location radius to my end point's and if they intersect emit a notification
-      this.checkProximityToEndPoint(this.state.currentLoc, loc, id, this.socket, {distance: 1, unit: 'miles'});
+      this.checkProximityToFriend(this.state.currentLoc, loc, this.props.userInfo.uid, id, this.socket, {distance: 1, unit: 'miles'});
 
       // Find the appropriate friend that triggered the change and update the map with friend's new location.
       var friends = this.friends;
@@ -280,22 +281,23 @@ var MapboxMap = React.createClass({
     });
    },
   /*
-   * Determines if a user and a end-points' location intersect. If so,
-   * notifies the end-point that the user is within the vicinity.
+   * Determines if a user and a friends' location intersect. If so,
+   * notifies the friend that the user is within the vicinity.
    * @params: myCoordinates - {longitude, latitude} of the user
-   *          endPointCoordinates - {longitude, latitude} of endPoint
-   *          endPointID - id of the end-point
+   *          friendCoordinates - {longitude, latitude} of friend
+   *          friendID - id of the friend
    *          socket - socket used to communicate to notification
    *          option.distance - distance between coordinates
    *          option.unit - unit of measurement for distance
    */
-   checkProximityToEndPoint: function(myCoordinates, endPointCoordinates, endPointID, socket, option) {
-    if (this.atSameLocation(myCoordinates, endPointCoordinates, option)) {
-      // push notification that my location is near my endpoint
-      socket.emit('notification', {senderID: socket.id, recipientID: endPointID, message: 'Within vicinity'});
+   checkProximityToFriend: function(myCoordinates, friendCoordinates, myID, friendID, socket, option) {
+    if (this.atSameLocation(myCoordinates, friendCoordinates, option)) {
+      // push notification that my location is near my friend
+      // get phone number for user and friend. Send notification to friend
+      // prevent message from being sent continually
+      this.debouncedSendNotification(socket, myID, friendID);
     }
   },
-
   sendShowLocation() {
     this.setState({showLocation: !this.state.showLocation});
     console.log('sending showLocation to DB:', this.state.showLocation);
@@ -303,7 +305,28 @@ var MapboxMap = React.createClass({
     console.log('user is:', user);
     api.updateUserData(user, 'showLocation', ''+this.state.showLocation);
   },
-
+  /* Send a message to the server to send a SMS notification */
+  sendUserSMSNotification(socket, myID, friendID) {
+    api.getUserData(myID)
+      .then(function(sender) {
+        var senderNumber = sender.phone;
+        api.getUserData(friendID)
+          .then(function(friend) {
+            var friendNumber = friend.phone;
+            socket.emit('notification', {
+              senderID: myID,
+              recipientID: friendID,
+              recipientNumber: senderNumber,
+              senderNumber: friendNumber,
+              message: friend.name + ' has just arrived in your area.'
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+      })
+      .catch((err) => console.log(err));
+  },
   render: function() {
     StatusBar.setHidden(true);
     return (

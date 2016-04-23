@@ -177,7 +177,7 @@ var api = {
         for (var k in users) {
           if (users[k].email) {
             if (users[k].email.toLowerCase().includes(emailInput.toLowerCase())) {
-              console.log('find user by email', users[k])
+              console.log('find user by email', users[k]);
               await callback(users[k]).then((res) => {
                 res.uid = k;
                 res.info = users[k];

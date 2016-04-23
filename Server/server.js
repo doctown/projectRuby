@@ -1,7 +1,9 @@
-var bodyParser = require('body-parser');
 var app = require('express')();
 var server = require('http').createServer(app);
+var bodyParser = require('body-parser');
+var _ = require('underscore');
 var io = require('socket.io').listen(server);
+var smsNotification = require('./scripts/notifications');
 
 console.log('Sapphire is listening in on 4568');
 server.listen(4568);
@@ -36,6 +38,13 @@ app.get('/map', function(req, res) {
   res.sendFile(__dirname + '/map.html');
 });
 
+/*
+app.get('/testNotification', function(req, res) {
+  smsNotification.sendSMSNotification('5617019861', '15612473337', 'test');
+  res.status(200).end();
+});
+*/
+
 app.post('/connect',
   function(req, res) {
     console.log(req.body);
@@ -60,6 +69,9 @@ io.on('connection', function(socket) {
    */
   socket.on('notification', (notification) => {
     sockets[notification.recipientID].emit('notification', notification);
+    if (notification) {
+      smsNotification.sendSMSNotification('5617019861', notification.recipientNumber, notification.message);
+    }
   });
 
   socket.on('registerID', (id) => {
@@ -124,3 +136,5 @@ io.on('connection', function(socket) {
 
   console.log('a user has connected');
 });
+
+module.exports = app;
