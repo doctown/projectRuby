@@ -6,7 +6,8 @@ import React, {
   StyleSheet,
   StatusBar,
   Dimensions,
-  AlertIOS
+  AlertIOS,
+  Switch
 } from 'react-native';
 import Mapbox from 'react-native-mapbox-gl';
 window.navigator.userAgent = "react-native";
@@ -316,6 +317,14 @@ var MapboxMap = React.createClass({
       onUpdateUserLocation={this.onUpdateUserLocation}
       onLongPress={this.onLongPress}
       onTap={this.onTap} />
+      <Text style={styles.overlayText}>Share Location</Text>
+      <Switch
+        onValueChange={() => this.setState({showLocation: !this.state.showLocation})}
+        style={styles.overlayLocationSwitch}
+        value={this.state.showLocation}
+        onTintColor="black"
+        thumbTintColor="white"
+        tintColor="white" />
       </View>
       );
   }
@@ -339,7 +348,31 @@ var styles = StyleSheet.create({
     flex: 1,
     alignItems: 'stretch',
     marginTop: 50
-  }
+  },
+  overlayLocationSwitch: {
+     flex: 1,
+     position: 'absolute',
+     top: 18,
+     left: 305,
+     opacity: 0.5,
+     width: width,
+     height: 45
+   },
+   overlayText: {
+    position: 'absolute',
+    width: 355,
+    height: 45,
+    top: 10,
+    left: 10,
+    opacity: 0.8,
+    fontSize: 20,
+    padding: 8,
+    textAlign: 'center',
+    backgroundColor: '#498183',
+    borderRadius: 8,
+    color: 'white',
+    fontWeight: 'bold'
+   }
 });
 
 module.exports = MapboxMap;
