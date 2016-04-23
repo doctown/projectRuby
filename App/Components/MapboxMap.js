@@ -285,6 +285,7 @@ var MapboxMap = React.createClass({
    * notifies the friend that the user is within the vicinity.
    * @params: myCoordinates - {longitude, latitude} of the user
    *          friendCoordinates - {longitude, latitude} of friend
+   *          myID - id of the user
    *          friendID - id of the friend
    *          socket - socket used to communicate to notification
    *          option.distance - distance between coordinates
