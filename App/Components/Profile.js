@@ -216,14 +216,14 @@ var styles = {
     backgroundColor: '#E3E3E3',
     alignItems: 'center',
     flexDirection: 'row',
-    marginBottom: 10
+    marginBottom: 0
     // flex: 1
   },
   searchInput: {
     height: 60,
     width: 300,
     // flexDirection: 'row',
-    padding: 15,
+    padding: 5,
     paddingLeft: 25,
     fontSize: 18,
     color: '#498183',

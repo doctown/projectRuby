@@ -26,7 +26,7 @@ var api = {
     var userId  = myData.uid;
     var userData = new Firebase(`https://project-ruby.firebaseio.com/UserData/${userId}`);
 
-    if(item && value) {
+    if(value) {
       userData.child(item).set(value);
     }
   },

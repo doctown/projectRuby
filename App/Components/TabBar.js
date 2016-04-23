@@ -4,7 +4,8 @@ import React, {
   StyleSheet,
   Text,
   View,
-  TabBarIOS
+  TabBarIOS,
+  Switch
 } from 'react-native';
 
 import Main from './Main';
@@ -23,7 +24,8 @@ class TabBar extends React.Component {
       isLoading: true,
       updateAlert: '',
       friendData: [],
-      friendReqData: []
+      friendReqData: [],
+      showLocation: false
     };
   }
 
